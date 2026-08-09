@@ -13,14 +13,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Python dependencies
-COPY pyproject.toml requirements.txt* /app/
-RUN pip install --upgrade pip && \
-    if [ -f requirements.txt ]; then \
-        pip install -r requirements.txt; \
-    else \
-        pip install django~=5.1 django-crispy-forms crispy-bootstrap5 \
-                    pillow celery[redis] polib gunicorn psycopg2-binary; \
-    fi
+COPY requirements.txt /app/
+RUN pip install --upgrade pip && pip install -r requirements.txt
 
 # ========== Production stage ==========
 FROM python:3.11-slim-bookworm AS production
