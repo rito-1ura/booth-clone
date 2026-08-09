@@ -14,6 +14,7 @@ from django.db import transaction
 from django.utils import timezone
 from .models import Order, OrderItem, Payment
 from .tasks import send_order_confirmation_email
+from .services import finalize_auto_payment
 
 
 PAYPAL_API_BASE = 'https://api-m.paypal.com'
@@ -157,32 +158,15 @@ def capture_paypal_payment(request, order_pk):
             messages.error(request, 'PayPal決済が完了していません。')
             return redirect('orders:order_detail', order_pk=order.pk)
 
-        with transaction.atomic():
-            order = Order.objects.select_for_update().get(pk=order.pk)
-            if order.status != Order.Status.PENDING:
-                messages.success(request, 'この注文は既に処理済みです。')
-                return redirect('orders:order_detail', order_pk=order.pk)
+        capture = data.get('purchase_units', [{}])[0].get('payments', {}).get('captures', [{}])[0]
+        capture_id = capture.get('id', '')
 
-            # 注文確定
-            order.status = Order.Status.PAID
-            order.paid_at = timezone.now()
-            order.save(update_fields=['status', 'paid_at'])
-
-            # ダウンロード解放
-            OrderItem.objects.filter(order=order).update(is_downloadable=True)
-
-            # 決済レコード更新
-            capture = data.get('purchase_units', [{}])[0].get('payments', {}).get('captures', [{}])[0]
-            Payment.objects.filter(order=order).update(
-                status=Payment.Status.CONFIRMED,
-                confirmed_at=timezone.now(),
-                notes=f'PayPal決済ID: {capture.get("id", "")}',
-            )
-
-            # メール送信
-            send_order_confirmation_email.delay(order.pk)
-
-        messages.success(request, 'PayPal決済が完了しました。ダウンロードが可能になりました。')
+        # 注文確定（冪等: 二重captureでも売上は一度だけ加算）
+        processed = finalize_auto_payment(order, f'PayPal決済ID: {capture_id}')
+        if processed:
+            messages.success(request, 'PayPal決済が完了しました。ダウンロードが可能になりました。')
+        else:
+            messages.success(request, 'この注文は既に処理済みです。')
     except requests.RequestException as e:
         messages.error(request, f'PayPal決済の確定に失敗しました: {e}')
     return redirect('orders:order_detail', order_pk=order.pk)
