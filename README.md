@@ -14,14 +14,15 @@
 | 機能 | 説明 |
 |---|---|
 | ショッピング | 商品一覧・カテゴリ絞り込み・検索・ランキング・お気に入り・共有 |
+| レビュー | 購入済みユーザーのみ投稿可（★1〜5＋コメント・注文単位で二重投稿防止・非公開管理） |
 | カート / 注文 | セッションベースのカート、注文履歴、注文詳細 |
 | 決済 | 銀行振込（手動確認）・コンビニ・PayPay・Stripe・PayPal |
-| クリエイター | 出品管理・注文管理・入金確認（ワンクリックでダウンロード解放）・売上レポート・CSVエクスポート |
+| クリエイター | 出品管理・注文管理・入金確認（ワンクリックでダウンロード解放）・売上レポート・CSVエクスポート・**出金申請**（残高管理・¥1,000〜・履歴バッジ） |
 | ダッシュボード | 売上推移（SVGグラフ）・統計カード・未入金注文 |
-| REST API | DRF + Token認証（モバイルアプリ連携用） |
+| REST API | DRF + Token認証（商品・カート・注文・お気に入り・レビュー投稿・出金申請） |
 | ストレージ | ローカル or S3互換（Cloudflare R2 / Backblaze B2 / MinIO） |
 | CI/CD | GitHub Actions（テスト + DockerイメージをGHCRへ自動push） |
-| 管理画面 | Django Admin（日本語化済み・101翻訳） |
+| 管理画面 | Django Admin（日本語化済み・103翻訳） |
 
 ## 技術スタック
 
@@ -31,7 +32,7 @@
 - DRF（djangorestframework + django-filter + Token認証）
 - Stripe / PayPal（REST v2、サンドボックス対応）
 - django-storages（S3互換）
-- Docker Compose（app / db / redis / celery-worker / celery-beat）
+- Docker Compose（app / db / redis / celery-worker / celery-beat / caddy）
 
 ## セットアップ（Windows + Git Bash）
 
@@ -87,10 +88,11 @@ export $(cat .env | xargs)   # 開発時のみ
 
 ```bash
 .venv/Scripts/python.exe manage.py test --noinput
-# 93件（accounts / shop / orders / orders.test_payments / api / 新機能）
+# 100件（accounts / shop / orders / orders.test_payments / orders.test_services / api / 新機能）
 ```
 
 決済テスト（Stripe/PayPal）は `unittest.mock` で外部APIをモックしており、**APIキーなしで実行可能**です。
+また、Stripe / PayPal のサンドボックスキーを使った**実決済フロー（承認→確定→売上反映）は実ブラウザで動作確認済み**です。
 
 ## 環境変数一覧
 
@@ -103,6 +105,9 @@ export $(cat .env | xargs)   # 開発時のみ
 | `EMAIL_BACKEND` / `EMAIL_HOST` / `EMAIL_PORT` / `EMAIL_HOST_USER` / `EMAIL_HOST_PASSWORD` / `EMAIL_USE_TLS` / `DEFAULT_FROM_EMAIL` | 本番必須 | メール通知設定 |
 | `CELERY_BROKER_URL` / `CELERY_RESULT_BACKEND` | 本番必須 | `redis://redis:6379/0` |
 | `CELERY_TASK_ALWAYS_EAGER` | - | `True`でRedisなし同期実行（テスト・開発用デフォルト） |
+| `DJANGO_SECURE_COOKIES` | 本番推奨 | `True`でSecureクッキー + HSTS（Caddy/リバースプロキシ配下） |
+| `DJANGO_CSRF_TRUSTED_ORIGINS` | 本番必須 | HTTPSドメイン（例: `https://example.com`）。未設定だとHTTPSでCSRF失敗 |
+| `DJANGO_SUPERUSER_EMAIL` / `DJANGO_SUPERUSER_PASSWORD` | - | entrypointが初期管理者を自動作成（Docker運用時） |
 | `STRIPE_PUBLISHABLE_KEY` / `STRIPE_SECRET_KEY` / `STRIPE_WEBHOOK_SECRET` | オプション | Stripe決済。取得: https://dashboard.stripe.com/apikeys |
 | `PAYPAL_CLIENT_ID` / `PAYPAL_CLIENT_SECRET` / `PAYPAL_SANDBOX` | オプション | PayPal決済。取得: https://developer.paypal.com/dashboard/applications |
 | `USE_S3` / `AWS_ACCESS_KEY_ID` / `AWS_SECRET_ACCESS_KEY` / `AWS_STORAGE_BUCKET_NAME` / `AWS_S3_ENDPOINT_URL` / `AWS_S3_REGION_NAME` | オプション | S3互換ストレージ（R2/B2/MinIO） |
