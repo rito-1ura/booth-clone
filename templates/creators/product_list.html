@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}商品管理 — Booth Clone{% endblock %}
+
+{% block content %}
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;">
+    <h1 class="section-title" style="margin-bottom:0;">商品管理</h1>
+    <a href="{% url 'creators:product_create' %}" class="btn btn-primary">＋ 新商品</a>
+</div>
+
+{% if products %}
+<div style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;">
+    <table class="order-history-table">
+        <thead>
+            <tr>
+                <th>商品名</th>
+                <th>カテゴリ</th>
+                <th>価格</th>
+                <th>種別</th>
+                <th>在庫</th>
+                <th>公開</th>
+                <th>作成日</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for product in products %}
+            <tr>
+                <td style="font-weight:600;">{{ product.name }}</td>
+                <td>{{ product.category.name }}</td>
+                <td style="font-weight:700;color:var(--accent);">¥{{ product.price|floatformat:0 }}</td>
+                <td>
+                    {% if product.product_type == 'digital' %}デジタル{% else %}物理{% endif %}
+                </td>
+                <td>
+                    {% if product.product_type == 'physical' and product.stock_quantity is not None %}
+                        {% if product.stock_quantity <= 0 %}
+                        <span style="color:var(--danger);">在庫切れ</span>
+                        {% elif product.stock_quantity <= 5 %}
+                        <span style="color:var(--warning);">{{ product.stock_quantity }}点</span>
+                        {% else %}
+                        {{ product.stock_quantity }}点
+                        {% endif %}
+                    {% else %}
+                    <span style="color:var(--text-muted);">—</span>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if product.is_public %}
+                    <span style="color:var(--success);">公開中</span>
+                    {% else %}
+                    <span style="color:var(--text-muted);">非公開</span>
+                    {% endif %}
+                </td>
+                <td style="color:var(--text-muted);font-size:.85rem;">{{ product.created_at|date:'Y/m/d' }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<div class="empty-state">
+    <h3>まだ商品がありません</h3>
+    <p>最初の商品を出品しましょう。</p>
+    <a href="{% url 'creators:product_create' %}" class="btn btn-primary" style="margin-top:16px;">商品を作成</a>
+</div>
+{% endif %}
+{% endblock %}

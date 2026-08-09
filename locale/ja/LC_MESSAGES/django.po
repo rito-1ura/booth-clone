@@ -1,0 +1,324 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Booth Clone 1.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-07-31 10:00+0900\n"
+"PO-Revision-Date: 2026-07-31 10:00+0900\n"
+"Last-Translator: \n"
+"Language-Team: Japanese\n"
+"Language: ja\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+
+# Accounts app
+msgid "user"
+msgstr "ユーザー"
+
+msgid "users"
+msgstr "ユーザー"
+
+msgid "email address"
+msgstr "メールアドレス"
+
+msgid "display name"
+msgstr "表示名"
+
+msgid "avatar"
+msgstr "アバター"
+
+msgid "email verified"
+msgstr "メール認証済み"
+
+msgid "is creator"
+msgstr "クリエイター"
+
+msgid "creator"
+msgstr "クリエイター"
+
+msgid "creators"
+msgstr "クリエイター"
+
+msgid "pen name"
+msgstr "ペンネーム"
+
+msgid "profile"
+msgstr "プロフィール"
+
+msgid "header image"
+msgstr "ヘッダー画像"
+
+msgid "Twitter URL"
+msgstr "Twitter URL"
+
+msgid "Pixiv URL"
+msgstr "Pixiv URL"
+
+msgid "website URL"
+msgstr "ウェブサイトURL"
+
+msgid "verified"
+msgstr "認証済み"
+
+msgid "total sales"
+msgstr "累計販売数"
+
+msgid "balance (yen)"
+msgstr "売上残高（円）"
+
+msgid "bank name"
+msgstr "銀行名"
+
+msgid "branch"
+msgstr "支店名"
+
+msgid "account type"
+msgstr "口座種別"
+
+msgid "account number"
+msgstr "口座番号"
+
+msgid "account name"
+msgstr "口座名義"
+
+# Shop app
+msgid "category"
+msgstr "カテゴリ"
+
+msgid "categories"
+msgstr "カテゴリ"
+
+msgid "parent category"
+msgstr "親カテゴリ"
+
+msgid "name"
+msgstr "名前"
+
+msgid "slug"
+msgstr "スラッグ"
+
+msgid "sort order"
+msgstr "表示順"
+
+msgid "active"
+msgstr "有効"
+
+msgid "shop"
+msgstr "ショップ"
+
+msgid "shops"
+msgstr "ショップ"
+
+msgid "shop name"
+msgstr "ショップ名"
+
+msgid "description"
+msgstr "説明"
+
+msgid "theme color"
+msgstr "テーマカラー"
+
+msgid "public"
+msgstr "公開"
+
+msgid "product"
+msgstr "商品"
+
+msgid "products"
+msgstr "商品"
+
+msgid "product type"
+msgstr "商品種別"
+
+msgid "digital"
+msgstr "デジタル"
+
+msgid "physical"
+msgstr "物理"
+
+msgid "price (yen)"
+msgstr "価格（円）"
+
+msgid "stock quantity"
+msgstr "在庫数"
+
+msgid "in stock"
+msgstr "在庫あり"
+
+msgid "file"
+msgstr "ファイル"
+
+msgid "file size (MB)"
+msgstr "ファイルサイズ (MB)"
+
+msgid "download limit"
+msgstr "ダウンロード上限回数"
+
+msgid "download expiry (days)"
+msgstr "ダウンロード有効期限（日）"
+
+msgid "published at"
+msgstr "公開日時"
+
+msgid "product image"
+msgstr "商品画像"
+
+msgid "product images"
+msgstr "商品画像"
+
+msgid "main image"
+msgstr "メイン画像"
+
+msgid "product tag"
+msgstr "商品タグ"
+
+msgid "product tags"
+msgstr "商品タグ"
+
+msgid "tag"
+msgstr "タグ"
+
+msgid "review"
+msgstr "レビュー"
+
+msgid "reviews"
+msgstr "レビュー"
+
+msgid "rating"
+msgstr "評価"
+
+msgid "comment"
+msgstr "コメント"
+
+# Orders app
+msgid "cart"
+msgstr "カート"
+
+msgid "carts"
+msgstr "カート"
+
+msgid "cart item"
+msgstr "カート商品"
+
+msgid "cart items"
+msgstr "カート商品"
+
+msgid "quantity"
+msgstr "数量"
+
+msgid "order"
+msgstr "注文"
+
+msgid "orders"
+msgstr "注文"
+
+msgid "order number"
+msgstr "注文番号"
+
+msgid "total amount"
+msgstr "合計金額"
+
+msgid "fee"
+msgstr "手数料"
+
+msgid "shipping"
+msgstr "送料"
+
+msgid "status"
+msgstr "ステータス"
+
+msgid "payment method"
+msgstr "決済方法"
+
+msgid "bank transfer"
+msgstr "銀行振込"
+
+msgid "convenience"
+msgstr "コンビニ支払い"
+
+msgid "paypay"
+msgstr "PayPay"
+
+msgid "shipping name"
+msgstr "配送先氏名"
+
+msgid "zip code"
+msgstr "郵便番号"
+
+msgid "address"
+msgstr "住所"
+
+msgid "phone"
+msgstr "電話番号"
+
+msgid "paid at"
+msgstr "入金日時"
+
+msgid "shipped at"
+msgstr "発送日時"
+
+msgid "completed at"
+msgstr "完了日時"
+
+msgid "order item"
+msgstr "注文明細"
+
+msgid "order items"
+msgstr "注文明細"
+
+msgid "product name"
+msgstr "商品名"
+
+msgid "price at order"
+msgstr "注文時価格"
+
+msgid "subtotal"
+msgstr "小計"
+
+msgid "downloadable"
+msgstr "ダウンロード可能"
+
+msgid "download count"
+msgstr "ダウンロード回数"
+
+msgid "last downloaded"
+msgstr "最終ダウンロード日時"
+
+msgid "payment"
+msgstr "決済"
+
+msgid "payments"
+msgstr "決済"
+
+msgid "amount"
+msgstr "金額"
+
+msgid "notes"
+msgstr "備考"
+
+msgid "download log"
+msgstr "ダウンロード履歴"
+
+msgid "download logs"
+msgstr "ダウンロード履歴"
+
+msgid "IP address"
+msgstr "IPアドレス"
+
+msgid "user agent"
+msgstr "ユーザーエージェント"
+
+msgid "withdrawal"
+msgstr "売上引き出し"
+
+msgid "withdrawals"
+msgstr "売上引き出し"
+
+msgid "bank info"
+msgstr "銀行口座情報"

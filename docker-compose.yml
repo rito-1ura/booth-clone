@@ -1,0 +1,144 @@
+version: "3.9"
+
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: ${PGDATABASE:-booth}
+      POSTGRES_USER: ${PGUSER:-booth}
+      POSTGRES_PASSWORD: ${PGPASSWORD:-booth_secret_2026}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${PGUSER:-booth} -d ${PGDATABASE:-booth}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - media_data:/app/media
+      - static_data:/app/staticfiles
+    environment:
+      DJANGO_DEBUG: "false"
+      DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY}
+      DJANGO_ALLOWED_HOSTS: ${DJANGO_ALLOWED_HOSTS:-localhost,127.0.0.1}
+      DATABASE_URL: ${DATABASE_URL}
+      PGDATABASE: ${PGDATABASE:-booth}
+      PGUSER: ${PGUSER:-booth}
+      PGPASSWORD: ${PGPASSWORD:-booth_secret_2026}
+      PGHOST: db
+      PGPORT: "5432"
+      CELERY_BROKER_URL: redis://redis:6379/0
+      CELERY_RESULT_BACKEND: redis://redis:6379/0
+      EMAIL_BACKEND: ${EMAIL_BACKEND:-django.core.mail.backends.smtp.EmailBackend}
+      EMAIL_HOST: ${EMAIL_HOST:-postfix}
+      EMAIL_PORT: ${EMAIL_PORT:-25}
+      DEFAULT_FROM_EMAIL: ${DEFAULT_FROM_EMAIL:-noreply@booth.local}
+      # Stripe / PayPal（手数料あり決済）
+      STRIPE_PUBLISHABLE_KEY: ${STRIPE_PUBLISHABLE_KEY:-}
+      STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY:-}
+      STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET:-}
+      PAYPAL_CLIENT_ID: ${PAYPAL_CLIENT_ID:-}
+      PAYPAL_CLIENT_SECRET: ${PAYPAL_CLIENT_SECRET:-}
+      PAYPAL_SANDBOX: ${PAYPAL_SANDBOX:-False}
+      # S3互換ストレージ
+      USE_S3: ${USE_S3:-False}
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID:-}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY:-}
+      AWS_STORAGE_BUCKET_NAME: ${AWS_STORAGE_BUCKET_NAME:-booth-media}
+      AWS_S3_ENDPOINT_URL: ${AWS_S3_ENDPOINT_URL:-}
+      AWS_S3_REGION_NAME: ${AWS_S3_REGION_NAME:-auto}
+    ports:
+      - "${PORT:-8000}:8000"
+    entrypoint: ["/app/docker-entrypoint.sh"]
+
+  celery-worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - media_data:/app/media
+    environment:
+      DJANGO_DEBUG: "false"
+      DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY}
+      DATABASE_URL: ${DATABASE_URL}
+      PGDATABASE: ${PGDATABASE:-booth}
+      PGUSER: ${PGUSER:-booth}
+      PGPASSWORD: ${PGPASSWORD:-booth_secret_2026}
+      PGHOST: db
+      PGPORT: "5432"
+      CELERY_BROKER_URL: redis://redis:6379/0
+      CELERY_RESULT_BACKEND: redis://redis:6379/0
+      EMAIL_BACKEND: ${EMAIL_BACKEND:-django.core.mail.backends.smtp.EmailBackend}
+      EMAIL_HOST: ${EMAIL_HOST:-postfix}
+      EMAIL_PORT: ${EMAIL_PORT:-25}
+      DEFAULT_FROM_EMAIL: ${DEFAULT_FROM_EMAIL:-noreply@booth.local}
+    command: celery -A booth worker -l info --concurrency=4
+
+  celery-beat:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      DJANGO_DEBUG: "false"
+      DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY}
+      DATABASE_URL: ${DATABASE_URL}
+      PGDATABASE: ${PGDATABASE:-booth}
+      PGUSER: ${PGUSER:-booth}
+      PGPASSWORD: ${PGPASSWORD:-booth_secret_2026}
+      PGHOST: db
+      PGPORT: "5432"
+      CELERY_BROKER_URL: redis://redis:6379/0
+      CELERY_RESULT_BACKEND: redis://redis:6379/0
+    command: celery -A booth beat -l info --scheduler django_celery_beat.schedulers:DatabaseScheduler
+
+  # Optional: local mail server (Postfix)
+  postfix:
+    image: bokysan/docker-postfix:latest
+    restart: unless-stopped
+    environment:
+      RELAYHOST: ${POSTFIX_RELAYHOST:-}
+      MYNETWORKS: "10.0.0.0/8 172.16.0.0/12 192.168.0.0/16"
+      MAILNAME: ${POSTFIX_MAILNAME:-booth.local}
+    ports:
+      - "25:25"
+
+volumes:
+  postgres_data:
+  redis_data:
+  media_data:
+  static_data:

@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}クリエイター登録 — Booth Clone{% endblock %}
+
+{% block content %}
+<div class="auth-page">
+    <div class="auth-card">
+        <h1 class="auth-title">クリエイターになる</h1>
+        <p style="text-align:center;color:var(--text-secondary);font-size:.9rem;margin-bottom:24px;">
+            あなたの作品を世界中に販売しましょう。<br>
+            完全無料、登録は30秒で完了します。
+        </p>
+
+        <form method="POST">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="pen_name">ペンネーム / ブランド名</label>
+                <input type="text" name="pen_name" id="pen_name" class="form-input"
+                       placeholder="例: クリエイティブ工房" required maxlength="100">
+                <div class="form-help">あなたの作品を代表する名前を設定してください。（後から変更可能）</div>
+            </div>
+
+            <div style="background:rgba(251,191,36,0.1);border:1px solid rgba(251,191,36,0.2);border-radius:var(--radius);padding:16px;margin-bottom:16px;font-size:.85rem;color:var(--text-secondary);">
+                <strong style="color:var(--warning);">登録前にご確認ください</strong><br>
+                • 銀行振込（手動確認）での決済となります<br>
+                • 売上金の引き出しには銀行口座の登録が必要です<br>
+                • 利用規約とプライバシーポリシーに同意の上ご登録ください
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-block btn-lg">クリエイター登録する</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

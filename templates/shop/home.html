@@ -1,0 +1,119 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Booth Clone — 個人クリエイターのための販売プラットフォーム{% endblock %}
+
+{% block content %}
+<!-- Hero -->
+<section class="hero">
+    <h1>クリエイターの作品を、<br>もっと直接届けよう</h1>
+    <p>Booth Cloneは個人クリエイター向けの完全無料販売プラットフォームです。<br>
+    イラスト、3Dモデル、音楽、ゲーム素材 — あなたの作品を世界中に販売できます。</p>
+    <div style="display:flex; gap:12px; justify-content:center; flex-wrap:wrap;">
+        <a href="{% url 'shop:product_list' %}" class="btn btn-primary btn-lg">作品を探す</a>
+        <a href="{% url 'accounts:become_creator' %}" class="btn btn-secondary btn-lg">出品を始める</a>
+    </div>
+</section>
+
+<!-- Categories -->
+<section style="margin-bottom: 32px;">
+    <h2 class="section-title">カテゴリから探す</h2>
+    <div class="category-pills">
+        {% for cat in categories %}
+        <a href="{% url 'shop:product_list_by_category' category_slug=cat.slug %}" class="category-pill">
+            {{ cat.name }}
+        </a>
+        {% endfor %}
+    </div>
+</section>
+
+<!-- New Arrivals -->
+<section style="margin-bottom: 32px;">
+    <h2 class="section-title">新着商品</h2>
+    {% if new_products %}
+    <div class="product-grid">
+        {% for product in new_products %}
+        <a href="{% url 'shop:product_detail' pk=product.pk %}" class="product-card" style="text-decoration:none; color:inherit;">
+            <div class="product-card-img">
+                {% with main_img=product.images.all|first %}
+                {% if main_img %}
+                <img src="{{ main_img.image.url }}" alt="{{ product.name }}" style="width:100%;height:100%;object-fit:cover;">
+                {% else %}
+                <span class="product-no-image" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" width="36" height="36" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 7h12l1.5 13.5a1 1 0 0 1-1 1.1H5.5a1 1 0 0 1-1-1.1L6 7z"/><path d="M9 10V6a3 3 0 0 1 6 0v4"/></svg>
+                </span>
+                {% endif %}
+                {% endwith %}
+            </div>
+            <div class="product-card-body">
+                <div class="product-card-price">¥{{ product.price|floatformat:0 }}</div>
+                <div class="product-card-name">{{ product.name }}</div>
+                <div class="product-card-creator">{{ product.creator.pen_name }}</div>
+            </div>
+        </a>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <p>まだ商品がありません。</p>
+    </div>
+    {% endif %}
+</section>
+
+<!-- Featured Creators -->
+<section style="margin-bottom: 32px;">
+    <h2 class="section-title">人気のクリエイター</h2>
+    <div style="display:flex; gap:12px; flex-wrap:wrap;">
+        {% for shop in featured_shops %}
+        <a href="{% url 'shop:shop_page' slug=shop.slug %}" class="creator-card" style="flex:1; min-width:200px; text-decoration:none;">
+            <div class="creator-avatar">{{ shop.creator.pen_name|first|upper }}</div>
+            <div class="creator-info">
+                <h4 style="color:var(--text-primary);">{{ shop.name }}</h4>
+                <p>{{ shop.creator.pen_name }}</p>
+                <p style="font-size:.8rem;color:var(--accent);">{{ shop.product_count }} 作品</p>
+            </div>
+        </a>
+        {% empty %}
+        <div class="empty-state" style="flex:1;">
+            <p>まだクリエイターがいません。</p>
+        </div>
+        {% endfor %}
+    </div>
+</section>
+
+<!-- Popular Products Ranking -->
+<section>
+    <h2 class="section-title">人気商品ランキング</h2>
+    {% if popular_products %}
+    <div style="display:flex; flex-direction:column; gap:8px;">
+        {% for product in popular_products %}
+        <a href="{% url 'shop:product_detail' pk=product.pk %}" style="display:flex;align-items:center;gap:12px;padding:12px;background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);text-decoration:none;color:inherit;transition:all.15s;">
+            <span style="font-size:1.2rem;font-weight:800;color:var(--accent);min-width:24px;">{{ forloop.counter }}</span>
+            <div style="width:48px;height:48px;border-radius:var(--radius-sm);background:var(--bg-hover);flex-shrink:0;display:flex;align-items:center;justify-content:center;">
+                {% with main_img=product.images.all|first %}
+                {% if main_img %}
+                <img src="{{ main_img.image.url }}" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:var(--radius-sm);">
+                {% else %}
+                <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 7h12l1.5 13.5a1 1 0 0 1-1 1.1H5.5a1 1 0 0 1-1-1.1L6 7z"/><path d="M9 10V6a3 3 0 0 1 6 0v4"/></svg>
+                {% endif %}
+                {% endwith %}
+            </div>
+            <div style="flex:1;">
+                <div style="font-weight:600;">{{ product.name }}</div>
+                <div style="font-size:.85rem;color:var(--text-muted);">{{ product.creator.pen_name }}</div>
+            </div>
+            <div style="text-align:right;">
+                <div style="font-weight:700;color:var(--accent);">¥{{ product.price|floatformat:0 }}</div>
+                {% if product.avg_rating %}
+                <div style="font-size:.8rem;color:var(--warning);">★{{ product.avg_rating|floatformat:1 }} ({{ product.review_count }})</div>
+                {% endif %}
+            </div>
+        </a>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <p>まだデータがありません。</p>
+    </div>
+    {% endif %}
+</section>
+{% endblock %}

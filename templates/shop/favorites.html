@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}お気に入り — Booth Clone{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>お気に入り</h1>
+    <p style="color:var(--text-muted);font-size:.9rem;">お気に入りに追加した商品の一覧です。</p>
+</div>
+
+{% if products %}
+<div class="product-grid">
+    {% for product in products %}
+    <a href="{% url 'shop:product_detail' pk=product.pk %}" class="product-card" style="text-decoration:none;color:inherit;">
+        <div class="product-card-img">
+            {% with main_img=product.images.all|first %}
+            {% if main_img %}
+            <img src="{{ main_img.image.url }}" alt="{{ product.name }}" style="width:100%;height:100%;object-fit:cover;">
+            {% else %}
+            <span class="product-no-image" aria-hidden="true">
+                <svg viewBox="0 0 24 24" width="36" height="36" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 7h12l1.5 13.5a1 1 0 0 1-1 1.1H5.5a1 1 0 0 1-1-1.1L6 7z"/><path d="M9 10V6a3 3 0 0 1 6 0v4"/></svg>
+            </span>
+            {% endif %}
+            {% endwith %}
+        </div>
+        <div class="product-card-body">
+            <div class="product-card-price">¥{{ product.price|floatformat:0 }}</div>
+            <div class="product-card-name">{{ product.name }}</div>
+            <div class="product-card-creator">{{ product.creator.pen_name }}</div>
+        </div>
+    </a>
+    {% endfor %}
+</div>
+{% else %}
+<div class="empty-state">
+    <h3>お気に入りはまだありません</h3>
+    <p>気になる商品の「お気に入り」ボタンを押して、ここに保存しましょう。</p>
+    <a href="{% url 'shop:product_list' %}" class="btn btn-secondary" style="margin-top:16px;">商品を探す</a>
+</div>
+{% endif %}
+{% endblock %}

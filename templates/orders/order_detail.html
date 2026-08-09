@@ -1,0 +1,144 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}注文詳細 {{ order.order_number }} — Booth Clone{% endblock %}
+
+{% block content %}
+<div style="max-width:800px;margin:0 auto;">
+    <a href="{% url 'orders:order_history' %}" style="color:var(--text-muted);font-size:.9rem;margin-bottom:16px;display:inline-block;">← 注文履歴に戻る</a>
+
+    <div class="dashboard-section">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px;">
+            <div>
+                <h2 style="font-size:1.3rem;font-weight:700;">注文番号: {{ order.order_number }}</h2>
+                <p style="color:var(--text-muted);font-size:.9rem;margin-top:4px;">
+                    {{ order.created_at|date:'Y年m月d日 H:i' }}
+                </p>
+            </div>
+            <span class="status-badge status-{{ order.status }}">{{ order.get_status_display }}</span>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px;padding-top:16px;border-top:1px solid var(--border);">
+            <div>
+                <div style="font-size:.85rem;color:var(--text-muted);">決済方法</div>
+                <div>
+                    {% if order.payment_method == 'bank_transfer' %}銀行振込
+                    {% elif order.payment_method == 'convenience' %}コンビニ支払い
+                    {% elif order.payment_method == 'paypay' %}PayPay
+                    {% elif order.payment_method == 'stripe' %}カード (Stripe)
+                    {% elif order.payment_method == 'paypal' %}PayPal
+                    {% endif %}
+                </div>
+            </div>
+            <div>
+                <div style="font-size:.85rem;color:var(--text-muted);">合計金額</div>
+                <div style="font-weight:700;font-size:1.1rem;color:var(--accent);">¥{{ order.total_amount|floatformat:0 }}</div>
+            </div>
+        </div>
+
+        {% if order.shipping_name %}
+        <div style="margin-top:16px;padding-top:16px;border-top:1px solid var(--border);">
+            <div style="font-size:.85rem;color:var(--text-muted);margin-bottom:8px;">配送先</div>
+            <p>〒{{ order.shipping_zip }}<br>
+            {{ order.shipping_address }}<br>
+            {{ order.shipping_name }}<br>
+            {{ order.shipping_phone }}</p>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Order Items -->
+    <h3 class="section-title">注文商品</h3>
+    {% for item in order.items.all %}
+    <div class="cart-item" style="margin-bottom:8px;">
+        <div class="cart-item-img" style="display:flex;align-items:center;justify-content:center;background:var(--bg-hover);">
+            <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 7h12l1.5 13.5a1 1 0 0 1-1 1.1H5.5a1 1 0 0 1-1-1.1L6 7z"/><path d="M9 10V6a3 3 0 0 1 6 0v4"/></svg>
+        </div>
+        <div class="cart-item-info">
+            <div class="cart-item-name">{{ item.product_name }}</div>
+            <div style="font-size:.85rem;color:var(--text-muted);">
+                価格: ¥{{ item.product_price|floatformat:0 }} × {{ item.quantity }}
+                {% if item.is_downloadable %}
+                <span style="color:var(--success);margin-left:8px;">
+                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:-2px;margin-right:3px;"><path d="m4 12.5 5 5L20 6.5"/></svg>
+                    ダウンロード可能
+                </span>
+                {% endif %}
+            </div>
+            {% if item.download_count > 0 %}
+            <div style="font-size:.8rem;color:var(--text-muted);">
+                ダウンロード: {{ item.download_count }}回 / {{ item.product.download_limit }}回
+                {% if item.last_downloaded_at %}
+                （最終: {{ item.last_downloaded_at|date:'Y/m/d H:i' }}）
+                {% endif %}
+            </div>
+            {% endif %}
+        </div>
+        <div style="text-align:right;">
+            <div style="font-weight:700;">¥{{ item.subtotal|floatformat:0 }}</div>
+            {% if item.is_downloadable and item.product.file_path %}
+            <a href="{% url 'orders:download' item_pk=item.pk %}" class="btn btn-primary btn-sm" style="margin-top:8px;">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M4 21h16"/></svg>
+                ダウンロード
+            </a>
+            {% elif not item.is_downloadable and order.status == 'pending' %}
+            <div style="font-size:.8rem;color:var(--warning);margin-top:8px;">入金待ち</div>
+            {% endif %}
+        </div>
+    </div>
+    {% endfor %}
+
+    <!-- Payment Info for pending orders -->
+    {% if order.status == 'pending' %}
+    <div class="dashboard-section" style="margin-top:16px;">
+        <h3>お支払い情報</h3>
+        {% if order.payment_method == 'bank_transfer' %}
+        <div class="bank-info" style="margin:0;">
+            <dl>
+                <dt>振込先銀行</dt>
+                <dd>○○銀行</dd>
+                <dt>口座種別</dt>
+                <dd>普通預金</dd>
+                <dt>口座番号</dt>
+                <dd>1234567</dd>
+                <dt>口座名義</dt>
+                <dd>ブース クローン</dd>
+                <dt>振込金額</dt>
+                <dd><strong style="font-size:1.1rem;color:var(--accent);">¥{{ order.total_amount|floatformat:0 }}</strong></dd>
+            </dl>
+        </div>
+        <p style="font-size:.85rem;color:var(--text-muted);margin-top:12px;">
+            入金確認後、ダウンロードが可能になります。<br>
+            確認には通常1〜3営業日かかります。
+        </p>
+        {% elif order.payment_method == 'paypay' %}
+        <div class="bank-info" style="margin:0;">
+            <dl>
+                <dt>PayPayID</dt>
+                <dd>@booth_clone</dd>
+                <dt>送金金額</dt>
+                <dd><strong style="font-size:1.1rem;color:var(--accent);">¥{{ order.total_amount|floatformat:0 }}</strong></dd>
+            </dl>
+        </div>
+        {% elif order.payment_method == 'stripe' %}
+        <p style="font-size:.9rem;color:var(--text-secondary);margin-bottom:16px;">
+            クレジットカード決済が未完了です。Stripe決済ページでお支払いください。<br>
+            <span style="font-size:.8rem;color:var(--text-muted);">※決済完了後、自動的にダウンロードが解放されます。</span>
+        </p>
+        <a href="{% url 'orders:stripe_create_session' order_pk=order.pk %}" class="btn btn-primary">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>
+            クレジットカードで支払う（¥{{ order.total_amount|floatformat:0 }}）
+        </a>
+        {% elif order.payment_method == 'paypal' %}
+        <p style="font-size:.9rem;color:var(--text-secondary);margin-bottom:16px;">
+            PayPal決済が未完了です。PayPalページでお支払いください。<br>
+            <span style="font-size:.8rem;color:var(--text-muted);">※決済完了後、自動的にダウンロードが解放されます。</span>
+        </p>
+        <a href="{% url 'orders:paypal_create' order_pk=order.pk %}" class="btn btn-primary">
+            <img src="https://www.paypalobjects.com/webstatic/en_US/i/buttons/pp-acceptance-small.png" alt="PayPal" style="height:18px;vertical-align:middle;margin-right:6px;">
+            PayPalで支払う（¥{{ order.total_amount|floatformat:0 }}）
+        </a>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

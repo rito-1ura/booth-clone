@@ -1,0 +1,143 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}クリエイターダッシュボード — Booth Clone{% endblock %}
+
+{% block content %}
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;">
+    <h1 class="section-title" style="margin-bottom:0;">ダッシュボード</h1>
+    <div style="display:flex;gap:8px;">
+        <a href="{% url 'creators:withdrawals' %}" class="btn btn-secondary">出金申請</a>
+        <a href="{% url 'creators:product_create' %}" class="btn btn-primary">＋ 新商品を出品</a>
+    </div>
+</div>
+
+<!-- Summary Cards -->
+<div class="dashboard-grid">
+    <div class="dashboard-stat">
+        <div class="dashboard-stat-value">¥{{ today_sales_amount|floatformat:0 }}</div>
+        <div class="dashboard-stat-label">本日の売上</div>
+    </div>
+    <div class="dashboard-stat">
+        <div class="dashboard-stat-value">{{ today_orders_count }}</div>
+        <div class="dashboard-stat-label">本日の注文</div>
+    </div>
+    <div class="dashboard-stat">
+        <div class="dashboard-stat-value">{{ unpaid_count }}</div>
+        <div class="dashboard-stat-label">未入金</div>
+    </div>
+    <div class="dashboard-stat">
+        <div class="dashboard-stat-value" style="color:var(--accent);">¥{{ creator.balance_yen|intcomma }}</div>
+        <div class="dashboard-stat-label">出金可能残高</div>
+    </div>
+</div>
+
+<!-- Pending Orders -->
+<div class="dashboard-section">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+        <h3 style="margin:0;padding:0;border:none;">未入金注文（要対応）</h3>
+        <a href="{% url 'creators:order_management' %}?status=pending" class="btn btn-secondary btn-sm">全て表示</a>
+    </div>
+
+    {% if pending_orders %}
+    <table class="order-history-table">
+        <thead>
+            <tr>
+                <th>注文番号</th>
+                <th>購入者</th>
+                <th>金額</th>
+                <th>注文日</th>
+                <th>アクション</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for order in pending_orders %}
+            <tr>
+                <td style="font-weight:600;">{{ order.order_number }}</td>
+                <td>{{ order.user.display_name }}</td>
+                <td>¥{{ order.total_amount|floatformat:0 }}</td>
+                <td>{{ order.created_at|date:'m/d H:i' }}</td>
+                <td>
+                    <a href="{% url 'creators:confirm_payment' order_pk=order.pk %}"
+                       class="btn btn-success btn-sm"
+                       data-confirm="この注文の入金を確認しますか？">
+                        入金確認
+                    </a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p style="color:var(--text-muted);text-align:center;padding:16px;">未入金の注文はありません。</p>
+    {% endif %}
+</div>
+
+{% if low_stock_products %}
+<div class="dashboard-section">
+    <h3>在庫アラート（残り5点以下）</h3>
+    <table class="order-history-table">
+        <thead>
+            <tr>
+                <th>商品名</th>
+                <th>在庫数</th>
+                <th>アクション</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for product in low_stock_products %}
+            <tr>
+                <td>{{ product.name }}</td>
+                <td style="color:var(--danger);font-weight:600;">残り{{ product.stock_quantity }}点</td>
+                <td><a href="{% url 'creators:product_list' %}" class="btn btn-secondary btn-sm">在庫管理</a></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endif %}
+
+<!-- Sales Chart -->
+<div class="dashboard-section">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+        <h3 style="margin:0;padding:0;border:none;">売上推移（7日間）</h3>
+        <a href="{% url 'creators:export_sales' %}?period=7" class="btn btn-secondary btn-sm">CSVダウンロード</a>
+    </div>
+    {% if daily_sales %}
+    {% with max_val=daily_sales|dictsortreversed:'total'|first %}
+    {% if max_val.total > 0 %}
+    <!-- SVG折れ線グラフ -->
+    <svg viewBox="0 0 700 220" preserveAspectRatio="xMidYMid meet" style="width:100%;height:auto;display:block;" role="img" aria-label="売上推移グラフ">
+        <!-- グリッド線 -->
+        <line x1="40" y1="180" x2="680" y2="180" stroke="#2A2A33" stroke-width="1"/>
+        {% for i in "01234" %}
+        <line x1="40" y1="{{ 60|add:i|add:i|add:20 }}" x2="680" y2="{{ 60|add:i|add:i|add:20 }}" stroke="#1A1A22" stroke-width="1"/>
+        {% endfor %}
+        <!-- データ点 -->
+        {% for day in daily_sales %}
+        {% widthratio forloop.counter0 6 640 as x0 %}
+        {% widthratio day.total max_val.total 130 as h %}
+        {% if day.total > 0 %}
+        <circle cx="{{ x0|add:40 }}" cy="{{ 180|add:h }}" r="4" fill="#818CF8"/>
+        <text x="{{ x0|add:40 }}" y="{{ 172|add:h }}" fill="#818CF8" font-size="11" text-anchor="middle" font-family="Segoe UI, sans-serif">¥{{ day.total|floatformat:0 }}</text>
+        {% endif %}
+        {% endfor %}
+        <!-- 日付ラベル -->
+        {% for day in daily_sales %}
+        {% widthratio forloop.counter0 6 640 as x0 %}
+        <text x="{{ x0|add:40 }}" y="200" fill="#9CA3AF" font-size="11" text-anchor="middle" font-family="Segoe UI, sans-serif">{{ day.date }}</text>
+        {% endfor %}
+    </svg>
+    {% else %}
+    <p style="color:var(--text-muted);text-align:center;padding:16px;">売上データがまだありません。</p>
+    {% endif %}
+    {% endwith %}
+    {% else %}
+    <p style="color:var(--text-muted);text-align:center;padding:16px;">データがありません。</p>
+    {% endif %}
+</div>
+
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+    <a href="{% url 'creators:product_list' %}" class="btn btn-secondary btn-block">商品管理</a>
+    <a href="{% url 'creators:sales_report' %}" class="btn btn-secondary btn-block">売上レポート</a>
+</div>
+{% endblock %}

@@ -1,0 +1,97 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load humanize %}
+{% block title %}出金申請 — Booth Clone{% endblock %}
+
+{% block content %}
+<div class="page-header" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;">
+    <div>
+        <h1>出金申請</h1>
+        <p style="color:var(--text-muted);font-size:.9rem;">売上残高を銀行口座へ出金します。</p>
+    </div>
+    <a href="{% url 'creators:dashboard' %}" class="btn btn-secondary btn-sm">ダッシュボードへ戻る</a>
+</div>
+
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;" class="withdraw-grid">
+    <div class="dashboard-section">
+        <div class="dashboard-stat-label">出金可能残高</div>
+        <div class="dashboard-stat-value">¥{{ creator.balance_yen|intcomma }}</div>
+        <div class="dashboard-stat-label" style="margin-top:8px;">累計売上</div>
+        <div class="dashboard-stat-value" style="font-size:1.4rem;">¥{{ creator.total_sales|intcomma }}</div>
+    </div>
+
+    <div class="dashboard-section">
+        <h3>出金申請フォーム</h3>
+
+        {% if not bank_registered %}
+        <div style="background:rgba(251,191,36,0.1);border:1px solid rgba(251,191,36,0.2);border-radius:var(--radius);padding:16px;margin-bottom:16px;font-size:.85rem;color:var(--text-secondary);">
+            <strong style="color:var(--warning);">銀行口座が未登録です</strong><br>
+            出金には振込先の銀行口座情報（銀行名・支店名・口座番号・口座名義）が必要です。
+            プロフィールから登録してください。
+        </div>
+        <a href="{% url 'accounts:profile' %}" class="btn btn-secondary">プロフィールで口座情報を登録</a>
+        {% else %}
+        <form method="POST" action="{% url 'creators:withdrawals' %}">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="amount">出金金額（円）</label>
+                <input type="number" name="amount" id="amount" class="form-input" min="1000"
+                       max="{{ creator.balance_yen }}" step="1" required
+                       placeholder="1,000円以上で指定">
+                <div class="form-help">出金可能残高: ¥{{ creator.balance_yen|intcomma }} / 最小出金額: ¥1,000</div>
+            </div>
+            <div class="form-group">
+                <label>振込先（申請時点の情報が記録されます）</label>
+                <div style="font-size:.85rem;color:var(--text-secondary);background:var(--bg-input);border:1px solid var(--border);border-radius:var(--radius);padding:12px;">
+                    {{ creator.bank_name }} {{ creator.bank_branch }}
+                    （{{ creator.get_bank_account_type_display }}）
+                    {{ creator.bank_account_number }}<br>
+                    口座名義: {{ creator.bank_account_name }}
+                </div>
+            </div>
+            <button type="submit" class="btn btn-primary">出金申請する</button>
+        </form>
+        {% endif %}
+    </div>
+</div>
+
+<div class="dashboard-section">
+    <h3>申請履歴</h3>
+    {% if withdrawals %}
+    <div style="overflow-x:auto;">
+        <table class="order-history-table">
+            <thead>
+                <tr>
+                    <th>申請日</th>
+                    <th>金額</th>
+                    <th>ステータス</th>
+                    <th>振込先</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for w in withdrawals %}
+                <tr>
+                    <td>{{ w.created_at|date:'Y/m/d H:i' }}</td>
+                    <td><strong>¥{{ w.amount|intcomma }}</strong></td>
+                    <td>
+                        {% if w.status == 'pending' %}
+                        <span class="badge badge-warning">申請中</span>
+                        {% elif w.status == 'processing' %}
+                        <span class="badge badge-info">処理中</span>
+                        {% elif w.status == 'completed' %}
+                        <span class="badge badge-success">完了</span>
+                        {% else %}
+                        <span class="badge badge-danger">却下</span>
+                        {% endif %}
+                    </td>
+                    <td style="font-size:.8rem;color:var(--text-muted);">{{ w.bank_info }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <p style="color:var(--text-muted);text-align:center;padding:16px;">出金申請はまだありません。</p>
+    {% endif %}
+</div>
+{% endblock %}

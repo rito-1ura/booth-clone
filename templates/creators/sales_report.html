@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}売上レポート — Booth Clone{% endblock %}
+
+{% block content %}
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;flex-wrap:wrap;gap:8px;">
+    <h1 class="section-title" style="margin-bottom:0;">売上レポート</h1>
+    <div style="display:flex;gap:8px;align-items:center;">
+        <a href="{% url 'creators:export_sales' %}?period={{ period }}" class="btn btn-secondary btn-sm">CSVダウンロード</a>
+        <div class="filter-bar" style="margin:0;">
+            <form method="GET" style="display:flex;gap:8px;">
+                <select name="period" class="form-select" onchange="this.form.submit()">
+                    <option value="7" {% if period == 7 %}selected{% endif %}>過去7日間</option>
+                    <option value="30" {% if period == 30 %}selected{% endif %}>過去30日間</option>
+                    <option value="90" {% if period == 90 %}selected{% endif %}>過去90日間</option>
+                    <option value="365" {% if period == 365 %}selected{% endif %}>過去1年間</option>
+                </select>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Summary -->
+<div class="dashboard-grid" style="margin-bottom:24px;">
+    <div class="dashboard-stat">
+        <div class="dashboard-stat-value">¥{{ total_revenue|floatformat:0 }}</div>
+        <div class="dashboard-stat-label">{{ period_label }}の総売上</div>
+    </div>
+    <div class="dashboard-stat">
+        <div class="dashboard-stat-value">{{ product_sales|length }}</div>
+        <div class="dashboard-stat-label">販売商品数</div>
+    </div>
+</div>
+
+<!-- Sales by Product -->
+<div class="dashboard-section">
+    <h3>商品別売上</h3>
+    {% if product_sales %}
+    <table class="order-history-table">
+        <thead>
+            <tr>
+                <th>商品名</th>
+                <th>販売数</th>
+                <th>注文数</th>
+                <th>売上</th>
+                <th>構成比</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in product_sales %}
+            <tr>
+                <td style="font-weight:600;">{{ item.product_name }}</td>
+                <td>{{ item.total_qty }}</td>
+                <td>{{ item.order_count }}</td>
+                <td style="font-weight:700;color:var(--accent);">¥{{ item.total_sales|floatformat:0 }}</td>
+                <td>
+                    {% if total_revenue > 0 %}
+                    <div style="display:flex;align-items:center;gap:8px;">
+                        <div style="flex:1;height:6px;background:var(--bg-hover);border-radius:3px;overflow:hidden;">
+                            <div style="height:100%;width:{% widthratio item.total_sales total_revenue 100 %}%;background:var(--accent);border-radius:3px;"></div>
+                        </div>
+                        {% widthratio item.total_sales total_revenue 100 %}%
+                    </div>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p style="color:var(--text-muted);text-align:center;padding:16px;">データがありません。</p>
+    {% endif %}
+</div>
+{% endblock %}

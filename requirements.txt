@@ -1,0 +1,13 @@
+django~=5.1
+django-crispy-forms
+crispy-bootstrap5
+pillow
+celery[redis]
+polib
+gunicorn
+psycopg2-binary
+djangorestframework
+django-filter
+stripe
+requests
+django-storages[s3]

@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}{{ shop.name }} — Booth Clone{% endblock %}
+
+{% block content %}
+<div class="shop-header" style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-lg);padding:32px;margin-bottom:24px;display:flex;align-items:center;gap:24px;">
+    <div class="creator-avatar" style="width:80px;height:80px;font-size:2rem;">{{ creator.pen_name|first|upper }}</div>
+    <div style="flex:1;">
+        <h1 style="font-size:1.5rem;font-weight:700;">{{ shop.name }}</h1>
+        <p style="color:var(--text-muted);font-size:.9rem;margin-top:4px;">
+            {{ creator.pen_name }} — 累計販売数: {{ creator.total_sales }}
+            {% if creator.is_verified %}
+            <span style="display:inline-block;padding:2px 8px;background:var(--accent-dim);color:var(--accent);font-size:.75rem;border-radius:100px;margin-left:8px;">認証済み</span>
+            {% endif %}
+        </p>
+        {% if shop.description %}
+        <p style="color:var(--text-secondary);margin-top:8px;">{{ shop.description }}</p>
+        {% endif %}
+    </div>
+</div>
+
+<h2 class="section-title">販売中の作品 ({{ products|length }})</h2>
+
+{% if products %}
+<div class="product-grid">
+    {% for product in products %}
+    <a href="{% url 'shop:product_detail' pk=product.pk %}" class="product-card" style="text-decoration:none;color:inherit;">
+        <div class="product-card-img">
+            {% with main_img=product.images.all|first %}
+            {% if main_img %}
+            <img src="{{ main_img.image.url }}" alt="" style="width:100%;height:100%;object-fit:cover;">
+            {% else %}
+            <span class="product-no-image" aria-hidden="true">
+                <svg viewBox="0 0 24 24" width="36" height="36" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 7h12l1.5 13.5a1 1 0 0 1-1 1.1H5.5a1 1 0 0 1-1-1.1L6 7z"/><path d="M9 10V6a3 3 0 0 1 6 0v4"/></svg>
+            </span>
+            {% endif %}
+            {% endwith %}
+        </div>
+        <div class="product-card-body">
+            <div class="product-card-price">¥{{ product.price|floatformat:0 }}</div>
+            <div class="product-card-name">{{ product.name }}</div>
+            <div class="product-card-creator">{{ product.category.name }}</div>
+        </div>
+    </a>
+    {% endfor %}
+</div>
+{% else %}
+<div class="empty-state">
+    <h3>まだ作品がありません</h3>
+</div>
+{% endif %}
+{% endblock %}

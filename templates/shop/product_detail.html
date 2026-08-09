@@ -1,0 +1,254 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}{{ product.name }} — Booth Clone{% endblock %}
+
+{% block content %}
+<div class="product-detail">
+    <!-- Gallery -->
+    <div class="product-gallery">
+        {% with main_img=images|first %}
+        {% if main_img %}
+        <img src="{{ main_img.image.url }}" alt="{{ product.name }}" class="product-main-image" id="mainImage">
+        {% else %}
+        <div class="product-main-image" style="flex-direction:column;gap:8px;">
+            <svg viewBox="0 0 24 24" width="64" height="64" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="opacity:.5;"><path d="M6 7h12l1.5 13.5a1 1 0 0 1-1 1.1H5.5a1 1 0 0 1-1-1.1L6 7z"/><path d="M9 10V6a3 3 0 0 1 6 0v4"/></svg>
+            <span>画像がありません</span>
+        </div>
+        {% endif %}
+        {% endwith %}
+
+        {% if images|length > 1 %}
+        <div class="product-thumbnails">
+            {% for img in images %}
+            <img src="{{ img.image.url }}" alt="" class="product-thumbnail{% if forloop.first %} active{% endif %}"
+                 onclick="document.getElementById('mainImage').src=this.src;document.querySelectorAll('.product-thumbnail').forEach(t=>t.classList.remove('active'));this.classList.add('active');">
+            {% endfor %}
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Product Info -->
+    <div class="product-info">
+        <div class="product-breadcrumb">
+            <a href="{% url 'shop:home' %}">ホーム</a> &gt;
+            <a href="{% url 'shop:product_list' %}">商品一覧</a> &gt;
+            <a href="{% url 'shop:product_list_by_category' category_slug=product.category.slug %}">{{ product.category.name }}</a>
+        </div>
+
+        <h1 class="product-title">{{ product.name }}</h1>
+
+        <div class="product-rating">
+            {% if review_count > 0 %}
+            <span style="color:var(--warning);">
+                {% for i in "12345" %}
+                {% if forloop.counter <= avg_rating|floatformat:0 %}★{% else %}☆{% endif %}
+                {% endfor %}
+            </span>
+            <span>{{ avg_rating|floatformat:1 }} ({{ review_count }}件のレビュー)</span>
+            {% else %}
+            <span style="color:var(--text-muted);">レビューはまだありません</span>
+            {% endif %}
+        </div>
+
+        <div class="product-price">
+            ¥{{ product.price|floatformat:0 }}
+            <small>税込</small>
+        </div>
+
+        <div>
+            {% if product.product_type == 'digital' %}
+            <span class="product-type-badge">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 7h12l1.5 13.5a1 1 0 0 1-1 1.1H5.5a1 1 0 0 1-1-1.1L6 7z"/><path d="M9 10V6a3 3 0 0 1 6 0v4"/></svg>
+                デジタル商品
+            </span>
+            {% if product.file_size_mb %}
+            <span class="product-type-badge" style="background:var(--bg-hover);color:var(--text-secondary);">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M4 21h16"/></svg>
+                {{ product.file_size_mb }} MB
+            </span>
+            {% endif %}
+            {% else %}
+            <span class="product-type-badge" style="background:rgba(251,191,36,0.15);color:var(--warning);">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 7h12l1.5 13.5a1 1 0 0 1-1 1.1H5.5a1 1 0 0 1-1-1.1L6 7z"/><path d="M9 10V6a3 3 0 0 1 6 0v4"/></svg>
+                物理商品
+            </span>
+            {% endif %}
+        </div>
+
+        <div class="product-stock {% if not product.is_in_stock %}out-of-stock{% elif product.stock_quantity and product.stock_quantity <= 5 %}low-stock{% else %}in-stock{% endif %}">
+            {% if product.product_type == 'digital' %}
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M4 21h16"/></svg>
+            入金確認後にダウンロード可能
+            {% elif product.stock_quantity is None %}
+            在庫あり
+            {% elif product.stock_quantity > 0 %}
+            {% if product.stock_quantity <= 5 %}
+            残り{{ product.stock_quantity }}点（残りわずか）
+            {% else %}
+            在庫あり (残り{{ product.stock_quantity }}点)
+            {% endif %}
+            {% else %}
+            在庫切れ
+            {% endif %}
+        </div>
+
+        <div class="product-actions">
+            {% if product.is_in_stock %}
+            <form action="{% url 'orders:cart_add' product_pk=product.pk %}" method="POST" style="display:inline;">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-primary btn-lg">
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="21" r="1.5"/><circle cx="19" cy="21" r="1.5"/><path d="M2.5 3h3l2.6 12.4a1.5 1.5 0 0 0 1.5 1.1h9.7a1.5 1.5 0 0 0 1.5-1.2L23 7H6"/></svg>
+                    カートに追加
+                </button>
+            </form>
+            {% else %}
+            <button class="btn btn-primary btn-lg" disabled>売り切れ</button>
+            {% endif %}
+        </div>
+
+        <div class="product-meta">
+            <form action="{% url 'shop:favorite_toggle' pk=product.pk %}" method="POST" style="display:inline;">
+                {% csrf_token %}
+                <button type="submit" class="favorite-btn {% if is_favorited %}is-active{% endif %}"
+                        aria-pressed="{% if is_favorited %}true{% else %}false{% endif %}">
+                    <svg viewBox="0 0 24 24" width="15" height="15" fill="{% if is_favorited %}currentColor{% else %}none{% endif %}" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 14c1.5-1.5 3-3.2 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.8 0-3 .5-4.5 2-1.5-1.5-2.7-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4 3 5.5l7 7z"/></svg>
+                    {% if is_favorited %}お気に入り済み{% else %}お気に入り{% endif %}
+                </button>
+            </form>
+            <span>
+                <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7"/><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"/></svg>
+                共有
+            </span>
+        </div>
+
+        <!-- Creator Info -->
+        <div class="creator-card" style="margin-bottom:0;">
+            <div class="creator-avatar">{{ product.creator.pen_name|first|upper }}</div>
+            <div class="creator-info">
+                <h4><a href="{% url 'shop:shop_page' slug=product.shop.slug %}">{{ product.creator.pen_name }}</a></h4>
+                <p>{{ product.creator.profile|truncatewords:20 }}</p>
+            </div>
+            <a href="{% url 'shop:shop_page' slug=product.shop.slug %}" class="btn btn-secondary btn-sm">ショップを見る</a>
+        </div>
+    </div>
+</div>
+
+<!-- Description -->
+<div class="dashboard-section">
+    <h3>商品詳細</h3>
+    <div class="product-description">
+        {{ product.description|linebreaks }}
+    </div>
+    {% if product.product_type == 'digital' %}
+    <div style="margin-top:16px;padding:16px;background:var(--accent-dim);border-radius:var(--radius);font-size:.9rem;color:var(--text-secondary);">
+        <strong style="color:var(--accent);">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:-2px;margin-right:5px;"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M4 21h16"/></svg>
+            ダウンロードについて
+        </strong><br>
+        • 対応フォーマット: 購入後にダウンロード可能<br>
+        • ファイルサイズ: {% if product.file_size_mb %}{{ product.file_size_mb }} MB{% else %}—{% endif %}<br>
+        • ダウンロード可能回数: {{ product.download_limit }}回<br>
+        • ダウンロード有効期限: 入金確認後{{ product.download_expiry_days }}日間<br>
+        • ライセンス: 購入時にご確認ください
+    </div>
+    {% endif %}
+</div>
+
+<!-- Creator's other products -->
+{% if creator_products %}
+<div class="dashboard-section">
+    <h3>同じクリエイターの作品</h3>
+    <div class="product-grid">
+        {% for cp in creator_products %}
+        <a href="{% url 'shop:product_detail' pk=cp.pk %}" class="product-card" style="text-decoration:none;color:inherit;">
+            <div class="product-card-img">
+                {% with main_img=cp.images.all|first %}
+                {% if main_img %}
+                <img src="{{ main_img.image.url }}" alt="" style="width:100%;height:100%;object-fit:cover;">
+                {% else %}
+                <span class="product-no-image" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" width="36" height="36" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 7h12l1.5 13.5a1 1 0 0 1-1 1.1H5.5a1 1 0 0 1-1-1.1L6 7z"/><path d="M9 10V6a3 3 0 0 1 6 0v4"/></svg>
+                </span>
+                {% endif %}
+                {% endwith %}
+            </div>
+            <div class="product-card-body">
+                <div class="product-card-price">¥{{ cp.price|floatformat:0 }}</div>
+                <div class="product-card-name">{{ cp.name }}</div>
+            </div>
+        </a>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+
+<!-- Reviews -->
+<div class="reviews-section">
+    <h2 class="section-title">レビュー ({{ review_count }})</h2>
+
+    {% if user.is_authenticated and purchasable_orders %}
+    <div class="review-form-box">
+        <h3>この商品を購入しましたか？レビューを投稿</h3>
+        <form method="POST" action="{% url 'shop:review_create' pk=product.pk %}">
+            {% csrf_token %}
+            <div class="form-group">
+                <label>評価</label>
+                <div class="star-rating-input">
+                    {% for i in "54321" %}
+                    <label class="star-option">
+                        <input type="radio" name="rating" value="{{ i }}" {% if forloop.first %}checked{% endif %}>
+                        <span>{{ i }}★</span>
+                    </label>
+                    {% endfor %}
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="review-comment">コメント（任意）</label>
+                <textarea name="comment" id="review-comment" class="form-textarea" rows="3"
+                          placeholder="商品の感想を入力してください"></textarea>
+            </div>
+            <div class="form-group">
+                <label for="review-order">購入した注文</label>
+                <select name="order_pk" id="review-order" class="form-select" required>
+                    {% for order in purchasable_orders %}
+                    <option value="{{ order.pk }}">注文 {{ order.order_number }}（{{ order.created_at|date:'Y/m/d' }}）</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <button type="submit" class="btn btn-primary">レビューを投稿する</button>
+        </form>
+    </div>
+    {% elif user.is_authenticated and not purchasable_orders %}
+    <p style="font-size:.85rem;color:var(--text-muted);margin-bottom:16px;">
+        この商品のレビューは、購入後（入金確認後）に投稿できます。
+    </p>
+    {% else %}
+    <p style="font-size:.85rem;color:var(--text-muted);margin-bottom:16px;">
+        レビューは購入後に投稿できます。
+    </p>
+    {% endif %}
+
+    {% if reviews %}
+        {% for review in reviews %}
+        <div class="review-card">
+            <div class="review-header">
+                <div>
+                    <span class="review-stars">
+                        {% for i in "12345" %}
+                        {% if forloop.counter <= review.rating %}★{% else %}☆{% endif %}
+                        {% endfor %}
+                    </span>
+                    <span class="review-author">{{ review.user.display_name }}</span>
+                </div>
+                <span class="review-date">{{ review.created_at|date:'Y/m/d' }}</span>
+            </div>
+            <div class="review-text">{{ review.comment|default:'レビューコメントはありません。' }}</div>
+        </div>
+        {% endfor %}
+    {% else %}
+    <div class="empty-state" style="padding:24px;">
+        <p>まだレビューはありません。</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

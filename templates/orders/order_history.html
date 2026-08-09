@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}注文履歴 — Booth Clone{% endblock %}
+
+{% block content %}
+<h1 class="section-title">注文履歴</h1>
+
+{% if orders %}
+<div style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;">
+    <table class="order-history-table">
+        <thead>
+            <tr>
+                <th>注文番号</th>
+                <th>日付</th>
+                <th>合計</th>
+                <th>決済方法</th>
+                <th>ステータス</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for order in orders %}
+            <tr>
+                <td style="font-weight:600;">{{ order.order_number }}</td>
+                <td>{{ order.created_at|date:'Y/m/d H:i' }}</td>
+                <td style="font-weight:700;">¥{{ order.total_amount|floatformat:0 }}</td>
+                <td>
+                    {% if order.payment_method == 'bank_transfer' %}銀行振込
+                    {% elif order.payment_method == 'convenience' %}コンビニ支払い
+                    {% elif order.payment_method == 'paypay' %}PayPay
+                    {% elif order.payment_method == 'stripe' %}カード (Stripe)
+                    {% elif order.payment_method == 'paypal' %}PayPal
+                    {% endif %}
+                </td>
+                <td><span class="status-badge status-{{ order.status }}">{{ order.get_status_display }}</span></td>
+                <td><a href="{% url 'orders:order_detail' order_pk=order.pk %}" class="btn btn-secondary btn-sm">詳細</a></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<div class="empty-state">
+    <h3>注文履歴がありません</h3>
+    <p>まだ注文されていません。<a href="{% url 'shop:product_list' %}">作品を探す</a></p>
+</div>
+{% endif %}
+{% endblock %}

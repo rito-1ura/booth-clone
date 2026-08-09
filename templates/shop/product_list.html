@@ -1,0 +1,82 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}
+{% if category %}{{ category.name }} — {% endif %}商品一覧 — Booth Clone
+{% endblock %}
+
+{% block content %}
+<div class="page-header" style="margin-bottom:24px;">
+    <h1 style="font-size:1.5rem;font-weight:700;">
+        {% if category %}{{ category.name }}{% else %}全商品{% endif %}
+    </h1>
+    {% if query %}
+    <p style="color:var(--text-muted);margin-top:4px;">「{{ query }}」の検索結果</p>
+    {% endif %}
+</div>
+
+<!-- Filter bar -->
+<div class="filter-bar">
+    <form method="GET" style="display:flex;gap:8px;flex-wrap:wrap;width:100%;">
+        {% if query %}
+        <input type="hidden" name="q" value="{{ query }}">
+        {% endif %}
+        <select name="sort" class="form-select" onchange="this.form.submit()">
+            <option value="-created_at" {% if current_sort == '-created_at' %}selected{% endif %}>新着順</option>
+            <option value="created_at" {% if current_sort == 'created_at' %}selected{% endif %}>古い順</option>
+            <option value="-price" {% if current_sort == '-price' %}selected{% endif %}>価格が高い順</option>
+            <option value="price" {% if current_sort == 'price' %}selected{% endif %}>価格が安い順</option>
+            <option value="name" {% if current_sort == 'name' %}selected{% endif %}>名前順</option>
+        </select>
+    </form>
+</div>
+
+<!-- Category pills -->
+{% if not category %}
+<div class="category-pills">
+    <a href="{% url 'shop:product_list' %}" class="category-pill active">すべて</a>
+    {% for cat in categories %}
+    <a href="{% url 'shop:product_list_by_category' category_slug=cat.slug %}" class="category-pill">{{ cat.name }}</a>
+    {% endfor %}
+</div>
+{% endif %}
+
+{% if products %}
+<div class="product-grid">
+    {% for product in products %}
+    <a href="{% url 'shop:product_detail' pk=product.pk %}" class="product-card" style="text-decoration:none;color:inherit;">
+        <div class="product-card-img">
+            {% with main_img=product.images.all|first %}
+            {% if main_img %}
+            <img src="{{ main_img.image.url }}" alt="{{ product.name }}" style="width:100%;height:100%;object-fit:cover;">
+            {% else %}
+            <span class="product-no-image" aria-hidden="true">
+                <svg viewBox="0 0 24 24" width="36" height="36" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M6 7h12l1.5 13.5a1 1 0 0 1-1 1.1H5.5a1 1 0 0 1-1-1.1L6 7z"/>
+                    <path d="M9 10V6a3 3 0 0 1 6 0v4"/>
+                </svg>
+            </span>
+            {% endif %}
+            {% endwith %}
+        </div>
+        <div class="product-card-body">
+            <div class="product-card-price">¥{{ product.price|floatformat:0 }}</div>
+            <div class="product-card-name">{{ product.name }}</div>
+            <div class="product-card-creator">{{ product.creator.pen_name }}</div>
+            {% if product.avg_rating %}
+            <div class="product-card-rating">★{{ product.avg_rating|floatformat:1 }} ({{ product.review_count }})</div>
+            {% endif %}
+            {% if product.product_type == 'physical' and product.stock_quantity is not None %}
+            <div style="font-size:.75rem;color:var(--text-muted);margin-top:4px;">残り{{ product.stock_quantity }}点</div>
+            {% endif %}
+        </div>
+    </a>
+    {% endfor %}
+</div>
+{% else %}
+<div class="empty-state">
+    <h3>商品が見つかりませんでした</h3>
+    <p>別のキーワードやカテゴリでお試しください。</p>
+    <a href="{% url 'shop:product_list' %}" class="btn btn-secondary" style="margin-top:16px;">すべての商品を見る</a>
+</div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,84 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}注文管理 — Booth Clone{% endblock %}
+
+{% block content %}
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:8px;">
+    <h1 class="section-title" style="margin-bottom:0;">注文管理</h1>
+    <a href="{% url 'creators:export_orders' %}" class="btn btn-secondary btn-sm">CSVダウンロード</a>
+</div>
+
+<div class="filter-bar">
+    <form method="GET" style="display:flex;gap:8px;">
+        <select name="status" class="form-select" onchange="this.form.submit()">
+            <option value="">全てのステータス</option>
+            <option value="pending" {% if current_status == 'pending' %}selected{% endif %}>入金待ち</option>
+            <option value="paid" {% if current_status == 'paid' %}selected{% endif %}>入金確認済</option>
+            <option value="shipped" {% if current_status == 'shipped' %}selected{% endif %}>発送済</option>
+            <option value="completed" {% if current_status == 'completed' %}selected{% endif %}>完了</option>
+            <option value="cancelled" {% if current_status == 'cancelled' %}selected{% endif %}>キャンセル</option>
+        </select>
+    </form>
+</div>
+
+{% if orders %}
+<div style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;">
+    <table class="order-history-table">
+        <thead>
+            <tr>
+                <th>注文番号</th>
+                <th>商品</th>
+                <th>購入者</th>
+                <th>金額</th>
+                <th>決済方法</th>
+                <th>注文日</th>
+                <th>ステータス</th>
+                <th>アクション</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for order in orders %}
+            <tr>
+                <td style="font-weight:600;">{{ order.order_number }}</td>
+                <td>
+                    {% for item in order.items.all %}
+                    <div style="font-size:.85rem;">{{ item.product_name }} ×{{ item.quantity }}</div>
+                    {% endfor %}
+                </td>
+                <td>{{ order.user.display_name }}</td>
+                <td style="font-weight:700;">¥{{ order.total_amount|floatformat:0 }}</td>
+                <td style="font-size:.85rem;">
+                    {% if order.payment_method == 'bank_transfer' %}銀行振込
+                    {% elif order.payment_method == 'convenience' %}コンビニ
+                    {% elif order.payment_method == 'paypay' %}PayPay
+                    {% elif order.payment_method == 'stripe' %}カード (Stripe)
+                    {% elif order.payment_method == 'paypal' %}PayPal
+                    {% endif %}
+                </td>
+                <td style="font-size:.85rem;color:var(--text-muted);">{{ order.created_at|date:'m/d H:i' }}</td>
+                <td><span class="status-badge status-{{ order.status }}">{{ order.get_status_display }}</span></td>
+                <td>
+                    {% if order.status == 'pending' %}
+                    <a href="{% url 'creators:confirm_payment' order_pk=order.pk %}"
+                       class="btn btn-success btn-sm"
+                       data-confirm="入金を確認してダウンロードを解放しますか？">
+                        入金確認
+                    </a>
+                    {% elif order.status == 'paid' %}
+                    <span style="font-size:.85rem;color:var(--success);">
+                        <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:-2px;margin-right:3px;"><path d="m4 12.5 5 5L20 6.5"/></svg>
+                        確認済
+                    </span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<div class="empty-state">
+    <h3>該当する注文がありません</h3>
+</div>
+{% endif %}
+{% endblock %}

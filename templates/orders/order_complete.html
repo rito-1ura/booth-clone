@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}注文完了 — Booth Clone{% endblock %}
+
+{% block content %}
+<div class="order-complete">
+    <div class="order-complete-icon">
+        <svg viewBox="0 0 24 24" width="40" height="40" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m4 12.5 5 5L20 6.5"/></svg>
+    </div>
+    <h2>ご注文ありがとうございます！</h2>
+    <p>注文を受け付けました。</p>
+
+    <div class="order-number">
+        注文番号: {{ order.order_number }}
+    </div>
+
+    {% if order.payment_method == 'bank_transfer' %}
+    <div class="bank-info">
+        <dl>
+            <dt>決済方法</dt>
+            <dd>銀行振込</dd>
+            <dt>振込先</dt>
+            <dd>○○銀行 普通預金 1234567</dd>
+            <dt>口座名義</dt>
+            <dd>ブース クローン</dd>
+            <dt>お振込金額</dt>
+            <dd>¥{{ order.total_amount|floatformat:0 }}</dd>
+            <dt>お振込期限</dt>
+            <dd>3営業日以内</dd>
+        </dl>
+    </div>
+    <p style="font-size:.9rem;color:var(--text-muted);">
+        ※入金確認後、ダウンロードリンクが有効になります。<br>
+        ※入金確認メールをお送りしますので、しばらくお待ちください。
+    </p>
+    {% elif order.payment_method == 'convenience' %}
+    <div class="bank-info">
+        <p>コンビニ支払い番号をメールでお送りしました。<br>
+        記載された番号をコンビニ端末に入力してお支払いください。</p>
+    </div>
+    {% elif order.payment_method == 'paypay' %}
+    <div class="bank-info">
+        <p>PayPayアプリから以下のIDに送金してください。</p>
+        <dl>
+            <dt>PayPayID</dt>
+            <dd>@booth_clone</dd>
+            <dt>送金金額</dt>
+            <dd>¥{{ order.total_amount|floatformat:0 }}</dd>
+        </dl>
+    </div>
+    {% endif %}
+
+    <div style="display:flex;gap:12px;justify-content:center;margin-top:24px;">
+        <a href="{% url 'orders:order_detail' order_pk=order.pk %}" class="btn btn-primary">注文詳細を見る</a>
+        <a href="{% url 'orders:order_history' %}" class="btn btn-secondary">注文履歴</a>
+        <a href="{% url 'shop:home' %}" class="btn btn-secondary">トップページへ戻る</a>
+    </div>
+</div>
+{% endblock %}

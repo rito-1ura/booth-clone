@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}プロフィール — Booth Clone{% endblock %}
+
+{% block content %}
+<div style="max-width:640px;margin:0 auto;">
+    <h1 class="section-title">プロフィール</h1>
+
+    <div class="dashboard-section">
+        <div style="display:flex;align-items:center;gap:16px;margin-bottom:16px;">
+            <div class="creator-avatar" style="width:64px;height:64px;font-size:1.5rem;">
+                {{ user.display_name|first|upper }}
+            </div>
+            <div>
+                <h3>{{ user.display_name }}</h3>
+                <p style="color:var(--text-muted);font-size:.9rem;">{{ user.email }}</p>
+            </div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+            <div>
+                <div style="font-size:.85rem;color:var(--text-muted);">表示名</div>
+                <div>{{ user.display_name }}</div>
+            </div>
+            <div>
+                <div style="font-size:.85rem;color:var(--text-muted);">メールアドレス</div>
+                <div>{{ user.email }}</div>
+            </div>
+            <div>
+                <div style="font-size:.85rem;color:var(--text-muted);">メール認証</div>
+                <div>{% if user.is_email_verified %}<span style="color:var(--success);">済み</span>{% else %}<span style="color:var(--danger);">未認証</span>{% endif %}</div>
+            </div>
+            <div>
+                <div style="font-size:.85rem;color:var(--text-muted);">クリエイター</div>
+                <div>{% if user.is_creator %}<span style="color:var(--success);">登録済み</span>{% else %}<span style="color:var(--text-muted);">未登録</span>{% endif %}</div>
+            </div>
+            <div>
+                <div style="font-size:.85rem;color:var(--text-muted);">登録日</div>
+                <div>{{ user.date_joined|date:'Y/m/d' }}</div>
+            </div>
+        </div>
+
+        <div style="margin-top:20px;display:flex;gap:8px;">
+            {% if user.is_creator %}
+            <a href="{% url 'creators:dashboard' %}" class="btn btn-primary">ダッシュボード</a>
+            {% else %}
+            <a href="{% url 'accounts:become_creator' %}" class="btn btn-primary">クリエイターになる</a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

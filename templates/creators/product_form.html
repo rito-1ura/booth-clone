@@ -1,0 +1,87 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}新商品を出品 — Booth Clone{% endblock %}
+
+{% block content %}
+<div style="max-width:720px;margin:0 auto;">
+    <h1 class="section-title">新商品を出品</h1>
+
+    <form method="POST" enctype="multipart/form-data" class="dashboard-section">
+        {% csrf_token %}
+
+        <div class="form-group">
+            <label for="name">商品名 *</label>
+            <input type="text" name="name" id="name" class="form-input" required maxlength="200"
+                   placeholder="例: オリジナルイラスト集 Vol.1">
+        </div>
+
+        <div class="form-group">
+            <label for="category">カテゴリ *</label>
+            <select name="category" id="category" class="form-select" required>
+                <option value="">選択してください</option>
+                {% for cat in categories %}
+                <option value="{{ cat.id }}">{{ cat.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="description">商品説明 *</label>
+            <textarea name="description" id="description" class="form-textarea" required
+                      placeholder="商品の詳細説明を入力してください（マークダウン対応予定）"></textarea>
+        </div>
+
+        <div class="form-group">
+            <label for="price">価格（税込）*</label>
+            <input type="number" name="price" id="price" class="form-input" required min="1" step="1"
+                   placeholder="例: 1200">
+            <div class="form-help">円単位で入力してください（例: 1,200円 → 1200）</div>
+        </div>
+
+        <div class="form-group">
+            <label for="product_type">商品種別</label>
+            <select name="product_type" id="product_type" class="form-select">
+                <option value="digital">デジタル商品（ダウンロード販売）</option>
+                <option value="physical">物理商品（発送が必要）</option>
+            </select>
+        </div>
+
+        <div class="form-group" id="stockField" style="display:none;">
+            <label for="stock_quantity">在庫数</label>
+            <input type="number" name="stock_quantity" id="stock_quantity" class="form-input" min="0">
+            <div class="form-help">物理商品の場合、在庫数を入力してください。空欄の場合は無制限。</div>
+        </div>
+
+        <div style="border-top:1px solid var(--border);padding-top:20px;margin-top:20px;">
+            <h3 style="font-size:1rem;font-weight:700;margin-bottom:16px;">商品画像</h3>
+
+            <div class="form-group">
+                <label for="main_image">メイン画像</label>
+                <input type="file" name="main_image" id="main_image" class="form-input" accept="image/*">
+                <div class="form-help">商品のメイン画像。推奨サイズ: 800×800px</div>
+            </div>
+
+            <div class="form-group">
+                <label for="extra_images">追加画像（複数選択可）</label>
+                <input type="file" name="extra_images" id="extra_images" class="form-input" accept="image/*" multiple>
+            </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-block btn-lg" style="margin-top:24px;">
+            商品を公開する
+        </button>
+    </form>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    var typeSelect = document.getElementById('product_type');
+    var stockField = document.getElementById('stockField');
+    function toggleStock() {
+        stockField.style.display = typeSelect.value === 'physical' ? 'block' : 'none';
+    }
+    typeSelect.addEventListener('change', toggleStock);
+    toggleStock();
+});
+</script>
+{% endblock %}

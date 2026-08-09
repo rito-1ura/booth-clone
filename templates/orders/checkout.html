@@ -1,0 +1,154 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}購入手続き — Booth Clone{% endblock %}
+
+{% block content %}
+<h1 class="section-title">購入手続き</h1>
+
+{% if not user.is_authenticated %}
+<div class="alert alert-warning" style="margin-bottom:16px;">
+    購入にはログインが必要です。
+    <a href="{% url 'accounts:login' %}?next={% url 'orders:checkout' %}" style="color:var(--warning);font-weight:600;">ログインする</a>
+</div>
+{% endif %}
+
+<div class="checkout-layout">
+    <div>
+        <form method="POST" id="checkoutForm">
+            {% csrf_token %}
+
+            <!-- Shipping Info -->
+            <div class="checkout-section">
+                <h3>1. お届け先情報 <span style="font-size:.8rem;color:var(--text-muted);font-weight:400;">（物理商品のみ）</span></h3>
+                <div class="form-group">
+                    <label for="shipping_name">お名前</label>
+                    <input type="text" name="shipping_name" id="shipping_name" class="form-input" placeholder="例: 山田 太郎">
+                </div>
+                <div style="display:grid;grid-template-columns:1fr 2fr;gap:8px;">
+                    <div class="form-group">
+                        <label for="shipping_zip">郵便番号</label>
+                        <input type="text" name="shipping_zip" id="shipping_zip" class="form-input" placeholder="123-4567">
+                    </div>
+                    <div class="form-group">
+                        <label for="shipping_address">住所</label>
+                        <input type="text" name="shipping_address" id="shipping_address" class="form-input" placeholder="東京都渋谷区...">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="shipping_phone">電話番号</label>
+                    <input type="tel" name="shipping_phone" id="shipping_phone" class="form-input" placeholder="090-1234-5678">
+                </div>
+            </div>
+
+            <!-- Payment Method -->
+            <div class="checkout-section">
+                <h3>2. 決済方法</h3>
+
+                <label class="payment-option">
+                    <input type="radio" name="payment_method" value="bank_transfer" checked>
+                    <div>
+                        <div class="payment-option-title">銀行振込（手数料無料）</div>
+                        <div class="payment-option-desc">指定口座へお振込ください。入金確認後に商品を解放します。</div>
+                        <div class="payment-details">
+                            <strong>振込先:</strong> ○○銀行 普通 1234567<br>
+                            <strong>口座名義:</strong> ブース クローン<br>
+                            ※3営業日以内に振込をお願いします
+                        </div>
+                    </div>
+                </label>
+
+                <label class="payment-option">
+                    <input type="radio" name="payment_method" value="convenience">
+                    <div>
+                        <div class="payment-option-title">コンビニ支払い（手数料無料）</div>
+                        <div class="payment-option-desc">支払番号をメールでお送りします。全国のコンビニでお支払いいただけます。</div>
+                    </div>
+                </label>
+
+                <label class="payment-option">
+                    <input type="radio" name="payment_method" value="paypay">
+                    <div>
+                        <div class="payment-option-title">PayPay送金（手数料無料）</div>
+                        <div class="payment-option-desc">PayPayアプリから送金してください。</div>
+                        <div class="payment-details">
+                            <strong>PayPayID:</strong> @booth_clone
+                        </div>
+                    </div>
+                </label>
+
+                {% if stripe_enabled %}
+                <label class="payment-option">
+                    <input type="radio" name="payment_method" value="stripe">
+                    <div>
+                        <div class="payment-option-title">クレジットカード（Stripe・手数料あり）</div>
+                        <div class="payment-option-desc">Visa / Mastercard / JCB など。即時決済で即ダウンロード可能。</div>
+                        <div class="payment-details">
+                            ※決済手数料: 3.6% + ¥40 が別途かかります（売上から差引）
+                        </div>
+                    </div>
+                </label>
+                {% endif %}
+
+                {% if paypal_enabled %}
+                <label class="payment-option">
+                    <input type="radio" name="payment_method" value="paypal">
+                    <div>
+                        <div class="payment-option-title">PayPal（手数料あり）</div>
+                        <div class="payment-option-desc">PayPal残高・登録カードで支払い。即時決済で即ダウンロード可能。</div>
+                        <div class="payment-details">
+                            ※決済手数料: 3.4% + ¥40 が別途かかります（売上から差引）
+                        </div>
+                    </div>
+                </label>
+                {% endif %}
+            </div>
+
+            <!-- Agreement -->
+            <div class="checkout-section">
+                <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
+                    <input type="checkbox" required>
+                    <span style="font-size:.9rem;"><a href="#" style="color:var(--accent);">利用規約</a>に同意する</span>
+                </label>
+            </div>
+        </form>
+    </div>
+
+    <!-- Order Summary Sidebar -->
+    <div>
+        <div class="cart-summary">
+            <h3 class="cart-summary-title">注文内容</h3>
+
+            {% for item in items %}
+            <div style="display:flex;justify-content:space-between;padding:8px 0;font-size:.9rem;border-bottom:1px solid var(--border);">
+                <div style="flex:1;">
+                    <div>{{ item.product.name }}</div>
+                    <div style="font-size:.8rem;color:var(--text-muted);">× {{ item.quantity }}</div>
+                </div>
+                <div style="font-weight:600;white-space:nowrap;">¥{{ item.subtotal|floatformat:0 }}</div>
+            </div>
+            {% endfor %}
+
+            <div class="cart-summary-row">
+                <span>小計</span>
+                <span>¥{{ total|floatformat:0 }}</span>
+            </div>
+            <div class="cart-summary-row">
+                <span>送料</span>
+                <span>¥0</span>
+            </div>
+            <div class="cart-summary-row">
+                <span>手数料</span>
+                <span>¥0（無料）</span>
+            </div>
+            <div class="cart-summary-total">
+                <span>合計（税込）</span>
+                <span class="amount">¥{{ total|floatformat:0 }}</span>
+            </div>
+
+            <button type="submit" form="checkoutForm" class="btn btn-primary btn-block btn-lg" style="margin-top:16px;">
+                注文を確定する
+            </button>
+        </div>
+    </div>
+</div>
+{% endblock %}
