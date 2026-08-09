@@ -322,3 +322,9 @@ msgstr "売上引き出し"
 
 msgid "bank info"
 msgstr "銀行口座情報"
+
+msgid "favorite"
+msgstr "お気に入り"
+
+msgid "favorites"
+msgstr "お気に入り"

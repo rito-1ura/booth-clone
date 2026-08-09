@@ -127,6 +127,22 @@ rclone sync s3:booth-media backup:booth-media
 - メディア: 週次バックアップ
 - バックアップはサイトとは別のストレージに保存する（3-2-1ルール）
 
+### 4.4 出金申請の処理（管理者）
+
+1. クリエイターが出金申請すると、出金一覧（`/admin/orders/withdrawal/`）に「申請中」で表示され、管理者へメール通知される
+2. 申請内容（金額・振込先スナップショット）を確認し、実際に振込を行う
+3. 振込完了後、管理画面でステータスを「完了」に変更（`processed_at` が自動記録）
+4. 残高不足・口座情報不備などで振込できない場合は「却下」に変更 → 申請額がクリエイターの残高へ自動戻し
+
+> **重要**: 出金申請時点で残高は減算済みです。却下時のみ残高に戻ります。
+> 完了にした場合の残高戻しは行われないため、二重振込に注意してください。
+
+### 4.5 レビュー・お気に入り（購入者向け機能）
+
+- **レビュー投稿**: 入金確認済み（paid）注文の購入者のみ投稿可。商品詳細ページの「レビューを書く」フォームから、評価（1〜5）＋コメント＋対象注文を選択
+- **お気に入り**: ログインユーザーは商品詳細のハートボタンで登録/解除。一覧は `/favorites/` で確認
+- 不適切なレビューは Django Admin で `is_public=False` にすると非表示化（一覧・平均評価から除外）
+
 ---
 
 ## 5. 障害対応
@@ -176,9 +192,12 @@ rclone sync s3:booth-media backup:booth-media
 - [ ] `DJANGO_SECRET_KEY` を強力なランダム値に設定（本番）
 - [ ] `DJANGO_DEBUG=False`（本番）
 - [ ] `DJANGO_ALLOWED_HOSTS` に実ドメインのみ許可
+- [ ] `DJANGO_CSRF_TRUSTED_ORIGINS` に実ドメインを設定（例: `https://example.com`）
+- [ ] `DJANGO_SECURE_COOKIES=true`（Secureクッキー + HSTS。Caddy配下で）
 - [ ] 本番は PostgreSQL + HTTPS（TLS終端）で運用
 - [ ] Stripe/PayPalはLiveキーを `.env` にのみ保持（リポジトリにコミットしない）
 - [ ] `SECRET_KEY` ・DBパスワードはリポジトリ外で管理
+- [ ] `DJANGO_SUPERUSER_EMAIL/PASSWORD` は初期作成後に削除・パスワード変更
 - [ ] 不要なスーパーユーザーは削除
 - [ ] 定期的に `pip-audit` または Dependabot で依存関係の脆弱性確認
 - [ ] S3バケットはプライベート設定（配信は署名付きURL経由）

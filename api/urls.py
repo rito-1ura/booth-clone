@@ -9,6 +9,8 @@ router.register(r'shops', views.ShopViewSet)
 router.register(r'products', views.ProductViewSet, basename='product')
 router.register(r'cart', views.CartViewSet, basename='cart')
 router.register(r'orders', views.OrderViewSet, basename='order')
+router.register(r'favorites', views.FavoriteViewSet, basename='favorite')
+router.register(r'withdrawals', views.WithdrawalViewSet, basename='withdrawal')
 
 app_name = 'api'
 

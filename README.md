@@ -87,7 +87,7 @@ export $(cat .env | xargs)   # 開発時のみ
 
 ```bash
 .venv/Scripts/python.exe manage.py test --noinput
-# 54件（accounts / shop / orders / orders.test_payments / api）
+# 93件（accounts / shop / orders / orders.test_payments / api / 新機能）
 ```
 
 決済テスト（Stripe/PayPal）は `unittest.mock` で外部APIをモックしており、**APIキーなしで実行可能**です。
@@ -169,10 +169,14 @@ docker compose up -d --build
 | `/api/products/popular/` | GET | 不要 | 人気商品 |
 | `/api/products/new_arrivals/` | GET | 不要 | 新着商品 |
 | `/api/products/{id}/` | GET | 不要 | 商品詳細 |
+| `/api/products/{id}/reviews/` | GET / POST | POST要Token | レビュー一覧 / 投稿（購入済みのみ） |
 | `/api/categories/` | GET | 不要 | カテゴリ一覧 |
 | `/api/shops/` | GET | 不要 | ショップ一覧 |
 | `/api/cart/` | GET/POST/DELETE | 要Token | カート操作 |
 | `/api/orders/` | GET | 要Token | 注文履歴 |
+| `/api/favorites/` | GET | 要Token | お気に入り一覧 |
+| `/api/favorites/add/` `/remove/` `/toggle/` | POST | 要Token | お気に入り操作 |
+| `/api/withdrawals/` | GET/POST | 要Token | 出金申請履歴 / 出金申請（クリエイターのみ） |
 | `/api/users/` | GET | 要Token | ユーザー一覧（本人情報のみ） |
 | `/api/auth/` | GET/POST | - | DRFログイン（ブラウズ可能API用） |
 

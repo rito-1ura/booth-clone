@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from accounts.models import User, Creator
-from shop.models import Category, Shop, Product, ProductImage, ProductTag, Review
-from orders.models import Cart, CartItem, Order, OrderItem, Payment
+from shop.models import Category, Shop, Product, ProductImage, ProductTag, Review, Favorite
+from orders.models import Cart, CartItem, Order, OrderItem, Payment, Withdrawal
 
 
 # ============================
@@ -186,3 +186,31 @@ class OrderSerializer(serializers.ModelSerializer):
             'items', 'created_at', 'paid_at',
         ]
         read_only_fields = ['id', 'order_number', 'created_at']
+
+
+# ============================
+# Favorites / Withdrawals
+# ============================
+class FavoriteSerializer(serializers.ModelSerializer):
+    """お気に入り（商品情報をネスト表示）。"""
+    product = ProductListSerializer(read_only=True)
+
+    class Meta:
+        model = Favorite
+        fields = ['id', 'product', 'created_at']
+        read_only_fields = ['id', 'created_at']
+
+
+class WithdrawalSerializer(serializers.ModelSerializer):
+    """出金申請。"""
+    status_display = serializers.CharField(source='get_status_display', read_only=True)
+
+    class Meta:
+        model = Withdrawal
+        fields = [
+            'id', 'amount', 'bank_info', 'status', 'status_display',
+            'notes', 'created_at', 'processed_at',
+        ]
+        read_only_fields = [
+            'id', 'bank_info', 'status', 'notes', 'created_at', 'processed_at',
+        ]
