@@ -124,8 +124,40 @@ cp .env.example .env    # 実値を記入
 docker compose up -d --build
 ```
 
-5サービス: `app`（gunicorn）/ `db`（postgres:16）/ `redis` / `celery-worker` / `celery-beat`。
+6サービス: `app`（gunicorn）/ `db`（postgres:16）/ `redis` / `celery-worker` / `celery-beat` / `caddy`（HTTPSリバースプロキシ）。
 `docker-entrypoint.sh` が migrate → 初期カテゴリ → collectstatic → gunicorn を自動実行します。
+
+## 本番デプロイ（VPS）
+
+```bash
+# 1. サーバー準備（例: Ubuntu 22.04）
+apt install docker.io docker-compose-v2
+
+# 2. ソース取得
+git clone https://github.com/rito-1ura/booth-clone.git
+cd booth-clone
+
+# 3. 環境変数（本番値）
+cp .env.example .env
+# 必ず設定:
+#   DJANGO_SECRET_KEY    ... openssl rand -hex 32 で生成した値
+#   DJANGO_DEBUG=false
+#   DJANGO_ALLOWED_HOSTS=example.com
+#   DJANGO_SUPERUSER_EMAIL / DJANGO_SUPERUSER_PASSWORD（初期管理者。未設定なら作成されない）
+#   PGPASSWORD            ... 強力なDBパスワードに変更
+#   EMAIL_HOST / POSTFIX_RELAYHOST（メール送信）
+
+# 4. ドメイン設定
+#    AレコードをサーバーIPに向け、deploy/Caddyfile の example.com を自ドメインに変更
+
+# 5. 起動（CaddyがLet's Encryptで自動HTTPS化）
+docker compose up -d --build
+```
+
+- **HTTPS**: Caddy が自動で Let's Encrypt 証明書を取得・更新（ポート80/443を開放）
+- **静的/メディア**: Caddy が `/static/` `/media/` を直接配信
+- **バックアップ**: `docker compose exec db pg_dump -U booth booth > backup.sql`（詳細は docs/OPERATION.md）
+- **更新**: `git pull && docker compose up -d --build`
 
 ## REST API 一覧
 

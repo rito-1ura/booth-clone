@@ -1,0 +1,36 @@
+# Booth Clone - Caddy リバースプロキシ設定
+#
+# 使い方:
+#   1. ドメインのAレコードをサーバーのIPに向ける
+#   2. .env の DJANGO_ALLOWED_HOSTS にドメインを追加
+#   3. 下記の example.com を自ドメインに置き換え
+#   4. docker compose up -d --build
+#
+# Caddy が Let's Encrypt で自動HTTPS化します（ポート80/443を開放すること）。
+
+example.com {
+    # 本番アプリへプロキシ
+    reverse_proxy app:8000
+
+    # メディアファイル（DB外の商品画像・DLファイル）の直接配信
+    handle_path /media/* {
+        root * /app/media
+        file_server
+    }
+
+    # 静的ファイル
+    handle_path /static/* {
+        root * /app/staticfiles
+        file_server
+    }
+
+    # セキュリティヘッダー
+    header {
+        X-Content-Type-Options nosniff
+        X-Frame-Options DENY
+        Referrer-Policy strict-origin-when-cross-origin
+        -Server
+    }
+
+    encode gzip
+}

@@ -1,0 +1,6 @@
+# シェルスクリプトは常にLF（コンテナ内での実行を保証）
+docker-entrypoint.sh text eol=lf
+*.sh text eol=lf
+
+# その他のテキストファイルはデフォルト（リポジトリはLF）
+* text=auto

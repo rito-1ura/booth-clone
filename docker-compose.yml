@@ -44,6 +44,8 @@ services:
       DJANGO_DEBUG: "false"
       DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY}
       DJANGO_ALLOWED_HOSTS: ${DJANGO_ALLOWED_HOSTS:-localhost,127.0.0.1}
+      DJANGO_SUPERUSER_EMAIL: ${DJANGO_SUPERUSER_EMAIL:-}
+      DJANGO_SUPERUSER_PASSWORD: ${DJANGO_SUPERUSER_PASSWORD:-}
       DATABASE_URL: ${DATABASE_URL}
       PGDATABASE: ${PGDATABASE:-booth}
       PGUSER: ${PGUSER:-booth}
@@ -137,8 +139,26 @@ services:
     ports:
       - "25:25"
 
+  # リバースプロキシ + 自動HTTPS（Let's Encrypt）
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    depends_on:
+      - app
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./deploy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+      - media_data:/app/media:ro
+      - static_data:/app/staticfiles:ro
+
 volumes:
   postgres_data:
   redis_data:
   media_data:
   static_data:
+  caddy_data:
+  caddy_config:
