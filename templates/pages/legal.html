@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% block title %}特定商取引法表示 — Booth Clone{% endblock %}
+
+{% block content %}
+<div class="page">
+    <div class="page-header">
+        <h1 class="page-title">特定商取引法に基づく表示</h1>
+        <p class="page-subtitle">特定商取引に関する法律に基づき、以下のとおり表示します。</p>
+    </div>
+
+    <div class="page-section">
+        <table>
+            <tr><th>販売業者</th><td>Booth Clone 運営（デモ環境のため仮情報です。本番運用時は実情報に置き換えてください）</td></tr>
+            <tr><th>運営責任者</th><td>Booth Clone 運営責任者</td></tr>
+            <tr><th>所在地</th><td>東京都千代田区（デモ環境のため仮情報です）</td></tr>
+            <tr><th>連絡先</th><td><a href="{% url 'contact' %}" style="color:var(--accent);">お問い合わせフォーム</a>（受付時間: 10:00〜18:00 / 土日祝除く）</td></tr>
+            <tr><th>販売価格</th><td>各商品ページに表示（税込）</td></tr>
+            <tr><th>商品代金以外の必要料金</th><td>通信料・振込手数料（決済方法により発生する場合があります）</td></tr>
+            <tr><th>支払方法</th><td>銀行振込 / コンビニ支払い / PayPay送金 / クレジットカード（Stripe）/ PayPal</td></tr>
+            <tr><th>支払時期</th><td>注文時に確定。銀行振込は入金確認をもって支払い完了となります。</td></tr>
+            <tr><th>商品の引渡時期</th><td>デジタルコンテンツ: 入金確認（または決済完了）後、即時にダウンロード可能</td></tr>
+            <tr><th>返品・返金</th><td>デジタルコンテンツの性質上、ダウンロード開始後の返品・返金は原則としてお受けできません。ダウンロード前の不具合による交換は、出品者とご相談ください。</td></tr>
+            <tr><th>動作環境</th><td>各商品ページに記載の推奨環境に準じます。記載がない場合は、一般的なWebブラウザで動作します。</td></tr>
+        </table>
+    </div>
+
+    <p class="updated">制定日: 2026年8月9日</p>
+</div>
+{% endblock %}

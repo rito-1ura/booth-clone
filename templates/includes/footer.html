@@ -24,18 +24,19 @@
             <div class="footer-section">
                 <h4>サポート</h4>
                 <ul>
-                    <li><a href="#">利用規約</a></li>
-                    <li><a href="#">プライバシーポリシー</a></li>
-                    <li><a href="#">特定商取引法表示</a></li>
-                    <li><a href="#">お問い合わせ</a></li>
+                    <li><a href="{% url 'support' %}">サポート</a></li>
+                    <li><a href="{% url 'terms' %}">利用規約</a></li>
+                    <li><a href="{% url 'privacy' %}">プライバシーポリシー</a></li>
+                    <li><a href="{% url 'legal' %}">特定商取引法表示</a></li>
+                    <li><a href="{% url 'contact' %}">お問い合わせ</a></li>
                 </ul>
             </div>
             <div class="footer-section">
                 <h4>クリエイター向け</h4>
                 <ul>
                     <li><a href="{% url 'accounts:become_creator' %}">出品を始める</a></li>
-                    <li><a href="#">販売ガイド</a></li>
-                    <li><a href="#">よくある質問</a></li>
+                    <li><a href="{% url 'guide' %}">販売ガイド</a></li>
+                    <li><a href="{% url 'faq' %}">よくある質問</a></li>
                 </ul>
             </div>
         </div>

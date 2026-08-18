@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+{% block title %}サポート — Booth Clone{% endblock %}
+
+{% block content %}
+<div class="page">
+    <div class="page-header">
+        <h1 class="page-title">サポート</h1>
+        <p class="page-subtitle">困ったときは、まずこちらをご確認ください。</p>
+    </div>
+
+    <div class="page-section">
+        <div class="support-grid">
+            <a href="{% url 'faq' %}" class="support-card">
+                <h3>
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 1 1 3.5 2.3c-.8.4-1 .9-1 1.7"/><circle cx="12" cy="16.5" r=".5" fill="currentColor"/></svg>
+                    よくある質問
+                </h3>
+                <p>購入・出品・決済に関するQ&Aをまとめています。まずはこちらをご覧ください。</p>
+            </a>
+            <a href="{% url 'guide' %}" class="support-card">
+                <h3>
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v18"/><path d="M5 7h14"/><path d="M5 17h14"/><path d="M3 7l2-2 2 2"/><path d="M3 17l2-2 2 2"/></svg>
+                    販売ガイド
+                </h3>
+                <p>はじめての出品から売上の受け取りまで、販売の流れを解説します。</p>
+            </a>
+            <a href="{% url 'contact' %}" class="support-card">
+                <h3>
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg>
+                    お問い合わせ
+                </h3>
+                <p>解決しない場合は、お問い合わせフォームからご連絡ください（3営業日以内に返信）。</p>
+            </a>
+        </div>
+    </div>
+
+    <div class="page-section">
+        <h2>規約・ポリシー</h2>
+        <ul>
+            <li><a href="{% url 'terms' %}" style="color:var(--accent);">利用規約</a></li>
+            <li><a href="{% url 'privacy' %}" style="color:var(--accent);">プライバシーポリシー</a></li>
+            <li><a href="{% url 'legal' %}" style="color:var(--accent);">特定商取引法表示</a></li>
+        </ul>
+    </div>
+</div>
+{% endblock %}

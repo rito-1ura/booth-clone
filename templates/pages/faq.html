@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+{% block title %}よくある質問 — Booth Clone{% endblock %}
+
+{% block content %}
+<div class="page">
+    <div class="page-header">
+        <h1 class="page-title">よくある質問</h1>
+        <p class="page-subtitle">よく寄せられるご質問と回答をまとめました。</p>
+    </div>
+
+    <div class="page-section">
+        <div class="qa-item">
+            <h3><span class="q-mark">Q.</span> 購入した商品はどこからダウンロードできますか？</h3>
+            <p>マイページの「注文履歴」→ 注文詳細からダウンロードできます。銀行振込・コンビニ・PayPayの場合は入金確認後、クレジットカード・PayPalの場合は決済完了後にダウンロードが可能になります。</p>
+        </div>
+        <div class="qa-item">
+            <h3><span class="q-mark">Q.</span> ダウンロードの回数に制限はありますか？</h3>
+            <p>商品ごとに設定された回数（標準3回）までダウンロードできます。回数を超過した場合は、出品者または運営者にご相談ください。</p>
+        </div>
+        <div class="qa-item">
+            <h3><span class="q-mark">Q.</span> 返品・返金はできますか？</h3>
+            <p>デジタルコンテンツの性質上、ダウンロード開始後の返品・返金は原則としてできません。商品に不具合がある場合は、出品者へお問い合わせください。</p>
+        </div>
+        <div class="qa-item">
+            <h3><span class="q-mark">Q.</span> 出品するにはどうすればいいですか？</h3>
+            <p>会員登録後、ヘッダーの「出品を始める」からクリエイター登録を行い、出品管理から商品を登録してください。詳細は<a href="{% url 'guide' %}" style="color:var(--accent);">販売ガイド</a>をご覧ください。</p>
+        </div>
+        <div class="qa-item">
+            <h3><span class="q-mark">Q.</span> 売上金はいつ受け取れますか？</h3>
+            <p>売上はクリエイター残高に加算されます。残高が ¥1,000 以上になると出金申請が可能になり、申請後に管理側の確認を経て振り込まれます。</p>
+        </div>
+        <div class="qa-item">
+            <h3><span class="q-mark">Q.</span> 決済手数料はいくらですか？</h3>
+            <p>銀行振込・コンビニ・PayPayは無料です。クレジットカード（Stripe）は3.6% + ¥40、PayPalは3.4% + ¥40が決済手数料として差し引かれます。</p>
+        </div>
+        <div class="qa-item">
+            <h3><span class="q-mark">Q.</span> カートに入れたのに商品が見つかりません</h3>
+            <p>カートはブラウザのセッションに保存されます。ブラウザを閉じたりクッキーを削除するとカートが空になる場合があります。ログイン状態でのご利用を推奨します。</p>
+        </div>
+        <div class="qa-item">
+            <h3><span class="q-mark">Q.</span> レビューは誰でも書けますか？</h3>
+            <p>レビューはその商品を購入したユーザーのみ投稿できます。同一注文につき1回までです。投稿されたレビューは運営側で確認のうえ公開されます。</p>
+        </div>
+        <div class="qa-item">
+            <h3><span class="q-mark">Q.</span> お問い合わせの返信はいつ頃来ますか？</h3>
+            <p>お問い合わせには通常3営業日以内にご返信いたします。内容によってはお時間をいただく場合があります。</p>
+        </div>
+    </div>
+</div>
+{% endblock %}

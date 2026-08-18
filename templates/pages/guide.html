@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+{% block title %}販売ガイド — Booth Clone{% endblock %}
+
+{% block content %}
+<div class="page">
+    <div class="page-header">
+        <h1 class="page-title">販売ガイド</h1>
+        <p class="page-subtitle">はじめての出品から売上の受け取りまで、販売の流れを解説します。</p>
+    </div>
+
+    <div class="page-section">
+        <h2>出品から販売までの流れ</h2>
+        <ol>
+            <li><strong>アカウント作成</strong> — メールアドレスで会員登録します。</li>
+            <li><strong>クリエイター登録</strong> — 「出品を始める」からクリエイターアカウントを作成します。</li>
+            <li><strong>商品を出品</strong> — 商品名・価格・説明・ファイルを登録します。画像やタグを設定すると見つけてもらいやすくなります。</li>
+            <li><strong>販売開始</strong> — 購入者が注文すると、注文管理画面に通知されます。</li>
+            <li><strong>入金確認</strong> — 銀行振込等の注文は、入金を確認して「入金確認」ボタンを押すと購入者にダウンロードが解放されます。</li>
+            <li><strong>売上受け取り</strong> — 売上はクリエイター残高に加算されます。残高が ¥1,000 以上になったら出金申請できます。</li>
+        </ol>
+    </div>
+
+    <div class="page-section">
+        <h2>手数料について</h2>
+        <table>
+            <tr><th>決済方法</th><th>手数料</th><th>入金確認</th></tr>
+            <tr><td>銀行振込 / コンビニ / PayPay</td><td>無料</td><td>手動確認</td></tr>
+            <tr><td>クレジットカード（Stripe）</td><td>3.6% + ¥40</td><td>自動（即時）</td></tr>
+            <tr><td>PayPal</td><td>3.4% + ¥40</td><td>自動（即時）</td></tr>
+        </table>
+        <p>クレジットカード・PayPalでの売上は、決済手数料を差し引いた金額がクリエイター残高に加算されます。</p>
+    </div>
+
+    <div class="page-section">
+        <h2>売上を伸ばすコツ</h2>
+        <ul>
+            <li>商品画像を用意して、商品ページの見た目を整える</li>
+            <li>詳細な説明文と対応フォーマット・ライセンスを明記する</li>
+            <li>タグを活用して検索で見つけてもらいやすくする</li>
+            <li>購入者からのレビューは品質改善のヒントになります</li>
+        </ul>
+    </div>
+
+    <div class="page-section">
+        <h2>注意事項</h2>
+        <ul>
+            <li>第三者の著作権を侵害するコンテンツの出品は禁止です。</li>
+            <li>購入者とのトラブルは出品者と購入者間で解決してください。</li>
+            <li>禁止事項に違反した出品は削除・アカウント停止の対象となります（<a href="{% url 'terms' %}" style="color:var(--accent);">利用規約</a>参照）。</li>
+        </ul>
+    </div>
+</div>
+{% endblock %}
