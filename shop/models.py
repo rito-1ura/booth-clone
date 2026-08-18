@@ -2,6 +2,7 @@ import uuid
 from django.db import models
 from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
+from django.urls import reverse
 from accounts.models import Creator
 
 
@@ -29,6 +30,9 @@ class Category(models.Model):
             self.slug = slugify(self.name, allow_unicode=True)
         super().save(*args, **kwargs)
 
+    def get_absolute_url(self):
+        return reverse('shop:product_list_by_category', args=[self.slug])
+
 
 class Shop(models.Model):
     """Creator's shop page."""
@@ -42,6 +46,7 @@ class Shop(models.Model):
     theme_color = models.CharField(_('theme color'), max_length=7, default='#3B82F6')
     is_public = models.BooleanField(_('public'), default=True)
     created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
         verbose_name = _('shop')
@@ -55,6 +60,9 @@ class Shop(models.Model):
             base = slugify(self.creator.pen_name, allow_unicode=True)
             self.slug = base[:50]
         super().save(*args, **kwargs)
+
+    def get_absolute_url(self):
+        return reverse('shop:shop_page', args=[self.slug])
 
 
 class Product(models.Model):
@@ -118,6 +126,9 @@ class Product(models.Model):
 
     def __str__(self):
         return self.name
+
+    def get_absolute_url(self):
+        return reverse('shop:product_detail', args=[str(self.pk)])
 
 
 class ProductImage(models.Model):
@@ -198,7 +209,8 @@ class Review(models.Model):
         unique_together = ('product', 'user', 'order')
         indexes = [
             models.Index(fields=['product', 'is_public']),
+            models.Index(fields=['created_at']),
         ]
 
     def __str__(self):
-        return f'{self.product.name} - ★{self.rating} by {self.user.display_name}'
+        return f'{self.product.name} - ★{self.rating} by {self.user.username}'
